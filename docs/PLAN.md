@@ -190,7 +190,8 @@ source/       RifaLocalDataSource, BoletaLocalDataSource, PagoLocalDataSource
 - [x] Repo git conectado a `github.com/jose-alejandro-loaiza-lopez/RifaApp`
 - [x] Core library desugaring (`java.time` en API 24+)
 - [x] Módulo `:core:domain` (Kotlin puro, sin Android)
-- [ ] Módulos `:core:data`, `:core:database` y `:feature:*`
+- [x] Módulos `:core:data` (repos en memoria) y `:feature:rifa`
+- [ ] Módulo `:core:database` y `:feature:config`
 - [ ] `build-logic` (convention plugins) para no repetir configuración
 
 ### Fase 1 — Dominio
@@ -210,14 +211,15 @@ source/       RifaLocalDataSource, BoletaLocalDataSource, PagoLocalDataSource
 
 ### Fase 3 — UI
 - [ ] `designsystem`: tema, tokens, `NumeroChip`, `EstadoBadge`, `ContadorResumen`
-- [ ] `feature:rifa` tablero con grilla y filtros
-- [ ] Detalle/venta con formulario validado
+- [x] `feature:rifa` tablero con grilla 5×20, resumen y detalle
+- [x] Detalle/venta con formulario validado (reservar, abonar, liberar)
+- [ ] Filtros del tablero (por estado, por número/cliente)
 - [ ] `feature:config` ajustes de la rifa
 - [ ] Navegación (type-safe routes)
-- [ ] Preview de cada pantalla
+- [x] Preview del tablero
 
 ### Fase 4 — Integraciones locales
-- [ ] Deep link WhatsApp: `https://wa.me/{telefono}?text={mensaje}` vía `Intent.ACTION_VIEW`
+- [x] Deep link WhatsApp: `https://wa.me/{telefono}?text={mensaje}` vía `Intent.ACTION_VIEW`
 - [ ] Plantillas de mensaje (reserva, recordatorio de saldo, confirmación de pago)
 - [ ] Copiar mensaje al portapapeles como fallback
 

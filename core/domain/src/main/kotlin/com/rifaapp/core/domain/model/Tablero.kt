@@ -5,6 +5,8 @@ data class Tablero(
     val rifa: Rifa,
     val numeros: List<Numero>,
     val recaudado: Long,
+    /** Boletas activas, para mostrar el detalle de un número sin otra consulta. */
+    val boletas: List<Boleta> = emptyList(),
 ) {
     val resumen: Resumen
         get() = Resumen(

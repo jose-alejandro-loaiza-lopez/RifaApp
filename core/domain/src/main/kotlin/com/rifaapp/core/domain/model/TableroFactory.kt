@@ -19,5 +19,6 @@ fun Rifa.construirTablero(boletas: List<Boleta>): Tablero {
         rifa = this,
         numeros = numeros,
         recaudado = boletas.sumOf { it.montoPagado },
+        boletas = boletas,
     )
 }
