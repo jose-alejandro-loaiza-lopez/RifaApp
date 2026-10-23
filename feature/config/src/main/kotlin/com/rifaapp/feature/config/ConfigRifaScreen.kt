@@ -266,6 +266,7 @@ Scaffold(
                 Text("Cancelar")
             }
 
+            Spacer(Modifier.height(16.dp))
         }
     }
 }
