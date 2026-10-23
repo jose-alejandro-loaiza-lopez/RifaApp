@@ -250,7 +250,7 @@ fun TableroScreen(
                     ) {
                         Text(
                             text = "Filtrar números",
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier
                                 .fillMaxWidth()
