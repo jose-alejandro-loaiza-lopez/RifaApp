@@ -16,6 +16,8 @@ data class Rifa(
     val numeroFin: Int = 99,
     val cantidadDigitos: Int = 2,
     val columnas: Int = 5,
+    /** Lotería con la que se juega (opcional). */
+    val loteria: String? = null,
 ) {
     val cantidadNumeros: Int get() = numeroFin - numeroInicio + 1
 

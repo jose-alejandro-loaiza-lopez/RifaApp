@@ -15,7 +15,7 @@ import java.time.Instant
  * Los estados no se guardan: salen de [Boleta.estado] al construir el tablero.
  */
 class InMemoryBoletaRepository(
-    boletasIniciales: List<Boleta> = emptyList(),
+    boletasIniciales: List<Boleta>,
 ) : BoletaRepository {
 
     private val boletas = MutableStateFlow(boletasIniciales)

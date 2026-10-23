@@ -10,6 +10,8 @@ import com.rifaapp.core.domain.model.Rifa
 import com.rifaapp.core.domain.repository.BoletaRepository
 import com.rifaapp.core.domain.usecase.GuardarConfiguracionRifa
 import com.rifaapp.core.domain.usecase.ObservarTablero
+import com.rifaapp.core.domain.validation.ValidadorRifa
+import com.rifaapp.core.domain.validation.ValidadorTelefono
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.Instant
@@ -38,6 +40,8 @@ class ConfigRifaViewModel(
             ConfigRifaUiState(
                 cargando = false,
                 rifa = tablero?.rifa ?: rifaPorDefecto(1L),
+                numeros = tablero?.numeros.orEmpty(),
+                boletas = tablero?.boletas.orEmpty(),
                 guardado = ok,
                 guardando = g,
                 mensaje = texto,
@@ -79,6 +83,7 @@ class ConfigRifaViewModel(
         val nueva = rifaActual.copy(
             titulo = formulario.titulo.trim(),
             descripcion = formulario.descripcion.trim(),
+            loteria = formulario.loteria.trim().ifBlank { null },
             precioBoleta = precio,
             fechaSorteo = formulario.fechaSorteo,
             numeroInicio = inicio,
@@ -140,6 +145,7 @@ class ConfigRifaViewModel(
         r.put("id", rifa.id)
         r.put("titulo", rifa.titulo)
         r.put("descripcion", rifa.descripcion)
+        r.put("loteria", rifa.loteria ?: JSONObject.NULL)
         r.put("fechaSorteo", rifa.fechaSorteo?.toString())
         r.put("precioBoleta", rifa.precioBoleta)
         r.put("numeroInicio", rifa.numeroInicio)
@@ -182,6 +188,7 @@ class ConfigRifaViewModel(
                 id = rifaActual.id,
                 titulo = r.optString("titulo", rifaActual.titulo),
                 descripcion = r.optString("descripcion", rifaActual.descripcion),
+                loteria = if (r.isNull("loteria")) null else r.optString("loteria").ifBlank { null },
                 fechaSorteo = fechaSorteo ?: rifaActual.fechaSorteo,
                 precioBoleta = r.optLong("precioBoleta", rifaActual.precioBoleta),
                 numeroInicio = r.optInt("numeroInicio", rifaActual.numeroInicio),
@@ -189,41 +196,103 @@ class ConfigRifaViewModel(
                 cantidadDigitos = r.optInt("cantidadDigitos", rifaActual.cantidadDigitos),
                 columnas = r.optInt("columnas", rifaActual.columnas),
             )
+
+            // Validar configuración antes de tocar datos.
+            val validacionRifa = ValidadorRifa.validar(rifa)
+            if (validacionRifa is Resultado.Fallo) {
+                mensaje.value = validacionRifa.error.textoVisible()
+                return
+            }
+
+            // Parsear y validar todas las boletas antes de borrar nada.
+            data class BoletaImportada(
+                val numero: Int,
+                val cliente: Cliente,
+                val notas: String?,
+                val pagos: List<Triple<Long, Long, String?>>,
+            )
+
+            val arr = root.optJSONArray("boletas") ?: JSONArray()
+            val importadas = mutableListOf<BoletaImportada>()
+            for (i in 0 until arr.length()) {
+                val o = arr.getJSONObject(i)
+                val numero = o.getInt("numero")
+                if (!rifa.contiene(numero)) {
+                    mensaje.value = "El número $numero está fuera del rango de la rifa."
+                    return
+                }
+                val nombre = o.optString("clienteNombre").trim()
+                if (nombre.isBlank()) {
+                    mensaje.value = "Hay una boleta sin nombre de cliente."
+                    return
+                }
+                val telefonoNormalizado = ValidadorTelefono.normalizar(o.optString("clienteTelefono"))
+                    ?: run {
+                        mensaje.value = "Teléfono inválido en el respaldo: ${o.optString("clienteTelefono")}"
+                        return
+                    }
+                val notas = if (o.isNull("notas")) null else o.optString("notas")
+                val pagosArray = o.optJSONArray("pagos") ?: JSONArray()
+                val pagos = mutableListOf<Triple<Long, Long, String?>>() // monto, fechaMillis, nota
+                for (j in 0 until pagosArray.length()) {
+                    val p = pagosArray.getJSONObject(j)
+                    val monto = p.optLong("monto")
+                    if (monto <= 0L) {
+                        mensaje.value = "Hay un pago con monto inválido en el respaldo."
+                        return
+                    }
+                    pagos.add(
+                        Triple(
+                            monto,
+                            p.optLong("fecha"),
+                            if (p.isNull("nota")) null else p.optString("nota"),
+                        )
+                    )
+                }
+                importadas.add(
+                    BoletaImportada(
+                        numero = numero,
+                        cliente = Cliente(nombre, telefonoNormalizado),
+                        notas = notas,
+                        pagos = pagos,
+                    )
+                )
+            }
+
+            // Aplicar: primero borrar las boletas actuales, luego guardar la rifa y las nuevas boletas.
             for (b in boletas.obtenerPorRifa(rifa.id)) {
                 boletas.liberar(b.id)
             }
-            guardarConfiguracion(rifa)
-            val arr = root.optJSONArray("boletas") ?: JSONArray()
-            for (i in 0 until arr.length()) {
-                val o = arr.getJSONObject(i)
-                val cliente = Cliente(
-                    nombre = o.optString("clienteNombre"),
-                    telefonoE164 = o.optString("clienteTelefono"),
-                )
-                val notas = if (o.isNull("notas")) null else o.optString("notas")
+            val resultadoRifa = guardarConfiguracion(rifa)
+            if (resultadoRifa is Resultado.Fallo) {
+                mensaje.value = resultadoRifa.error.textoVisible()
+                return
+            }
+
+            for (imp in importadas) {
                 val result = boletas.guardar(
                     Boleta(
                         rifaId = rifa.id,
-                        numero = o.getInt("numero"),
-                        cliente = cliente,
-                        notas = notas,
+                        numero = imp.numero,
+                        cliente = imp.cliente,
+                        notas = imp.notas,
                     )
                 )
                 val boletaId = when (result) {
                     is Resultado.Exito<*> -> (result.valor as Boleta).id
                     else -> null
                 } ?: continue
-                val pagos = o.optJSONArray("pagos") ?: JSONArray()
-                for (j in 0 until pagos.length()) {
-                    val p = pagos.getJSONObject(j)
+                for ((monto, fechaMillis, nota) in imp.pagos) {
                     boletas.registrarPago(
                         boletaId = boletaId,
-                        monto = p.optLong("monto"),
-                        fecha = Instant.ofEpochMilli(p.optLong("fecha")),
-                        nota = if (p.isNull("nota")) null else p.optString("nota"),
+                        monto = monto,
+                        fecha = Instant.ofEpochMilli(fechaMillis),
+                        nota = nota,
                     )
                 }
             }
+
+            mensaje.value = "Respaldo importado correctamente."
         } catch (e: Exception) {
             mensaje.value = "No se pudo importar el respaldo."
         }

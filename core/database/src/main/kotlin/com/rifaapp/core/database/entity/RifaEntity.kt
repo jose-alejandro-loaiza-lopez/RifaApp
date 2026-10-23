@@ -17,4 +17,5 @@ data class RifaEntity(
     val numeroFin: Int,
     val cantidadDigitos: Int,
     val columnas: Int = 5,
+    val loteria: String? = null,
 )

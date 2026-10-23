@@ -40,12 +40,12 @@ sealed interface ErrorDominio {
     data class Desconocido(val mensaje: String) : ErrorDominio
 }
 
-inline fun <T> Resultado<T>.alExito(accion: (T) -> Unit): Resultado<T> {
+fun <T> Resultado<T>.alExito(accion: (T) -> Unit): Resultado<T> {
     if (this is Resultado.Exito) accion(valor)
     return this
 }
 
-inline fun <T> Resultado<T>.alFallo(accion: (ErrorDominio) -> Unit): Resultado<T> {
+fun <T> Resultado<T>.alFallo(accion: (ErrorDominio) -> Unit): Resultado<T> {
     if (this is Resultado.Fallo) accion(error)
     return this
 }

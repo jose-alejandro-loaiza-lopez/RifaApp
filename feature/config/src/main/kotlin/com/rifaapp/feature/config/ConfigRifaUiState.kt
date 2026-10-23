@@ -1,11 +1,15 @@
 package com.rifaapp.feature.config
 
 import com.rifaapp.core.designsystem.parsearPesosACentavos
+import com.rifaapp.core.domain.model.Boleta
+import com.rifaapp.core.domain.model.Numero
 import com.rifaapp.core.domain.model.Rifa
 
 data class ConfigRifaUiState(
     val cargando: Boolean = true,
     val rifa: Rifa? = null,
+    val numeros: List<Numero> = emptyList(),
+    val boletas: List<Boleta> = emptyList(),
     val guardando: Boolean = false,
     val guardado: Boolean = false,
     val mensaje: String? = null,
@@ -14,6 +18,7 @@ data class ConfigRifaUiState(
 data class FormularioRifa(
     val titulo: String = "",
     val descripcion: String = "",
+    val loteria: String = "",
     val precioTexto: String = "",
     val fechaSorteo: java.time.LocalDate? = null,
     val numeroInicioTexto: String = "",
@@ -33,6 +38,7 @@ data class FormularioRifa(
         fun desde(rifa: Rifa): FormularioRifa = FormularioRifa(
             titulo = rifa.titulo,
             descripcion = rifa.descripcion,
+            loteria = rifa.loteria.orEmpty(),
             precioTexto = (rifa.precioBoleta / 100).toString(),
             fechaSorteo = rifa.fechaSorteo,
             numeroInicioTexto = rifa.numeroInicio.toString(),

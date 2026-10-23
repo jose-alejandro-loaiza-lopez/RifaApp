@@ -101,6 +101,14 @@ internal class FakeBoletaRepository : BoletaRepository {
         return Resultado.Exito(actualizada)
     }
 
+    override suspend fun actualizarMontoPagado(boletaId: Long, montoCentavos: Long): Resultado<Boleta> {
+        val actual = boletas.value.firstOrNull { it.id == boletaId }
+            ?: return Resultado.Fallo(ErrorDominio.BoletaNoEncontrada)
+        val actualizada = actual.copy(pagos = if (montoCentavos > 0L) listOf(Pago(boletaId = boletaId, monto = montoCentavos, fecha = Instant.now())) else emptyList())
+        boletas.value = boletas.value.map { if (it.id == boletaId) actualizada else it }
+        return Resultado.Exito(actualizada)
+    }
+
     override suspend fun liberar(boletaId: Long): Resultado<Unit> {
         boletas.value = boletas.value.filterNot { it.id == boletaId }
         return Resultado.Exito(Unit)

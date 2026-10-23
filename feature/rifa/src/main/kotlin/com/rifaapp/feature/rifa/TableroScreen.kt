@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
@@ -221,6 +222,7 @@ fun TableroScreen(
                         DetalleContenido(
                             rifa = rifa,
                             detalle = detalle,
+                            boletas = state.boletas,
                             onReservar = onReservar,
                             onAbonar = onAbonar,
                             onLiberar = onLiberar,
@@ -393,6 +395,7 @@ private fun CeldaNumero(
             .semantics { contentDescription = "$etiqueta, ${estado.nombreLegible()}" }
             .aspectRatio(1f)
             .background(fondo, RoundedCornerShape(10.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -443,6 +446,7 @@ private fun EstadoNumero.nombreLegible(): String = when (this) {
 private fun DetalleContenido(
     rifa: Rifa,
     detalle: DetalleNumero,
+    boletas: List<Boleta> = emptyList(),
     onReservar: (String, String, Long?) -> Unit,
     onAbonar: (Long) -> Unit,
     onLiberar: () -> Unit,
@@ -461,6 +465,11 @@ private fun DetalleContenido(
 
     val context = LocalContext.current
     val boleta = detalle.boleta
+    val boletasCliente = if (boleta != null) {
+        boletas.filter { it.cliente.telefonoE164 == boleta.cliente.telefonoE164 }
+    } else emptyList()
+    val numerosCliente = boletasCliente.map { it.numero }
+    val saldoTotalCliente = boletasCliente.sumOf { it.saldo(rifa.precioBoleta) }
 
     Column(
         modifier = Modifier
@@ -520,6 +529,10 @@ private fun DetalleContenido(
             InfoFila("Precio", formatearPrecio(detalle.precio))
             InfoFila("Pagado", formatearPrecio(detalle.pagado))
             InfoFila("Saldo", formatearPrecio(detalle.saldo))
+            if (numerosCliente.size > 1) {
+                InfoFila("Números comprados", numerosCliente.map { rifa.formatear(it) }.joinToString(", "))
+                InfoFila("Saldo total del cliente", formatearPrecio(saldoTotalCliente))
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -529,7 +542,7 @@ private fun DetalleContenido(
                         abrirWhatsApp(
                             context = context,
                             telefonoE164 = boleta.cliente.telefonoE164,
-                            mensaje = mensajeWhatsApp(rifa, detalle, boleta),
+                            mensaje = mensajeWhatsApp(rifa, detalle, boleta, numerosCliente, saldoTotalCliente),
                         )
                     },
                     modifier = Modifier.weight(1f),
@@ -717,16 +730,45 @@ private fun DialogoMonto(
     )
 }
 
-private fun mensajeWhatsApp(rifa: Rifa, detalle: DetalleNumero, boleta: Boleta): String = buildString {
-    append("Hola ${boleta.cliente.nombre}! Te escribo por la rifa \"${rifa.titulo}\". ")
-    append("Tienes el número ${detalle.etiqueta}. ")
-    if (detalle.saldo > 0L) {
-        append("Saldo pendiente: ${formatearPrecio(detalle.saldo)}. ")
-    } else {
-        append("Está pagado por completo. ")
+private fun mensajeWhatsApp(
+    rifa: Rifa,
+    detalle: DetalleNumero,
+    boleta: Boleta,
+    numerosCliente: List<Int>,
+    saldoTotalCliente: Long,
+): String = buildString {
+    appendLine("Hola ${boleta.cliente.nombre}! 👋")
+    appendLine()
+    appendLine("Te escribo por la rifa \"${rifa.titulo}\".")
+    if (rifa.descripcion.isNotBlank()) {
+        appendLine(rifa.descripcion.trim())
     }
-    rifa.fechaSorteo?.let { append("El sorteo es el ${it.format(FORMATO_FECHA)}. ") }
-    append("¡Gracias!")
+    appendLine()
+    val etiquetas = numerosCliente.map { rifa.formatear(it) }
+    if (numerosCliente.size > 1) {
+        appendLine("📌 Compraste ${numerosCliente.size} números: ${etiquetas.joinToString(", ")}")
+    } else {
+        appendLine("📌 Número asignado: ${detalle.etiqueta}")
+    }
+    appendLine("Precio por número: ${formatearPrecio(detalle.precio)}")
+    if (saldoTotalCliente > 0L) {
+        appendLine("Pagado: ${formatearPrecio(numerosCliente.size.toLong() * detalle.precio - saldoTotalCliente)}")
+        appendLine("Saldo pendiente total: ${formatearPrecio(saldoTotalCliente)}")
+    } else {
+        appendLine("✅ Pagado por completo")
+    }
+    appendLine()
+    val fechaSorteo = rifa.fechaSorteo
+    if (fechaSorteo != null) {
+        appendLine("🗓 Sorteo: ${fechaSorteo.format(FORMATO_FECHA)}")
+    } else {
+        appendLine("🗓 Jugará cuando se vendan todas las boletas")
+    }
+    if (!rifa.loteria.isNullOrBlank()) {
+        appendLine("🎯 Juega con: ${rifa.loteria}")
+    }
+    appendLine()
+    append("¡Gracias por participar! 🍀")
 }
 
 private fun abrirWhatsApp(context: Context, telefonoE164: String, mensaje: String) {

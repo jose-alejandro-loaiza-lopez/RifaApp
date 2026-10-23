@@ -1,11 +1,20 @@
 package com.rifaapp.feature.config
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.rememberScrollState
@@ -18,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -35,16 +45,31 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color as AndroidColor
+import android.graphics.Paint
+import android.net.Uri
+import androidx.core.content.FileProvider
+import java.io.File
+import java.io.FileOutputStream
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.rifaapp.core.designsystem.parsearPesosACentavos
+import com.rifaapp.core.designsystem.theme.ThemeColor
+import com.rifaapp.core.designsystem.theme.ThemeMode
 import com.rifaapp.core.domain.model.Rifa
 import java.time.Instant
 import java.time.ZoneOffset
@@ -56,6 +81,10 @@ private val FORMATO_FECHA: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/M
 @Composable
 fun ConfigRifaScreen(
     state: ConfigRifaUiState,
+    themeMode: ThemeMode = ThemeMode.AUTO,
+    themeColor: ThemeColor = ThemeColor.AUTO,
+    onThemeModeChange: (ThemeMode) -> Unit = {},
+    onThemeColorChange: (ThemeColor) -> Unit = {},
     onVolver: () -> Unit,
     onGenerarRespaldo: suspend () -> String? = { null },
     onImportarRespaldo: suspend (String) -> Unit = {},
@@ -89,6 +118,8 @@ fun ConfigRifaScreen(
     }
 
     var mostrarFecha by remember { mutableStateOf(false) }
+    var mostrarCaptura by remember { mutableStateOf(false) }
+    var mostrarColores by remember { mutableStateOf(false) }
     var confirmarRestaurar by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
@@ -114,6 +145,8 @@ fun ConfigRifaScreen(
     var tituloTmp by remember { mutableStateOf("") }
     var mostrarDescripcion by remember { mutableStateOf(false) }
     var descripcionTmp by remember { mutableStateOf("") }
+    var mostrarLoteria by remember { mutableStateOf(false) }
+    var loteriaTmp by remember { mutableStateOf("") }
     var mostrarPrecio by remember { mutableStateOf(false) }
     var precioTmp by remember { mutableStateOf("") }
     var mostrarDesde by remember { mutableStateOf(false) }
@@ -207,6 +240,15 @@ fun ConfigRifaScreen(
             dismissButton = { TextButton(onClick = { mostrarDescripcion = false }) { Text("Cancelar") } },
         )
     }
+    if (mostrarLoteria) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { mostrarLoteria = false },
+            title = { Text("Lotería") },
+            text = { OutlinedTextField(value = loteriaTmp, onValueChange = { loteriaTmp = it }, singleLine = true, modifier = Modifier.fillMaxWidth()) },
+            confirmButton = { TextButton(onClick = { formulario = formulario.copy(loteria = loteriaTmp.trim()); mostrarLoteria = false }) { Text("Aceptar") } },
+            dismissButton = { TextButton(onClick = { mostrarLoteria = false }) { Text("Cancelar") } },
+        )
+    }
     if (mostrarPrecio) {
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { mostrarPrecio = false },
@@ -242,6 +284,191 @@ fun ConfigRifaScreen(
             confirmButton = { TextButton(onClick = { formulario = formulario.copy(columnasTexto = columnasTmp.trim()); mostrarColumnas = false }) { Text("Aceptar") } },
             dismissButton = { TextButton(onClick = { mostrarColumnas = false }) { Text("Cancelar") } },
         )
+    }
+
+if (mostrarCaptura) {
+        val rifaCaptura = rifa
+        if (rifaCaptura != null) {
+            val context = LocalContext.current
+            var enviando by remember { mutableStateOf(false) }
+            androidx.compose.ui.window.Dialog(
+                onDismissRequest = { mostrarCaptura = false },
+                properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+            ) {
+                androidx.compose.material3.Surface(
+                    color = Color.White,
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "Vista para captura",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.Black,
+                            )
+                            TextButton(onClick = { mostrarCaptura = false }) {
+                                Text("Cerrar", color = Color.Black)
+                            }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(rifaCaptura.columnas.coerceIn(1, 12)),
+                                modifier = Modifier.fillMaxWidth(0.92f),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(8.dp),
+                            ) {
+                                items(
+                                    items = state.numeros,
+                                    key = { it.valor },
+                                ) { numero ->
+                                    val ocupado = numero.estado != com.rifaapp.core.domain.model.EstadoNumero.DISPONIBLE
+                                    val etiqueta = rifaCaptura.formatear(numero.valor)
+                                    Box(
+                                        modifier = Modifier
+                                            .aspectRatio(1f)
+                                            .background(
+                                                color = if (ocupado) Color(0xFFF2F2F2) else Color(0xFFE8F5E9),
+                                                shape = RoundedCornerShape(8.dp),
+                                            ),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        if (ocupado) {
+                                            Text(
+                                                text = etiqueta,
+                                                color = Color.Gray,
+                                                textDecoration = TextDecoration.LineThrough,
+                                                style = MaterialTheme.typography.titleMedium,
+                                            )
+                                            Text(
+                                                text = "X",
+                                                color = Color.Red,
+                                                fontWeight = FontWeight.Bold,
+                                                style = MaterialTheme.typography.titleLarge,
+                                            )
+                                        } else {
+                                            Text(
+                                                text = etiqueta,
+                                                color = Color(0xFF2E7D32),
+                                                fontWeight = FontWeight.SemiBold,
+                                                style = MaterialTheme.typography.titleMedium,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            Button(
+                                onClick = {
+                                    if (enviando) return@Button
+                                    enviando = true
+                                    scope.launch {
+                                        val ocupados = state.numeros
+                                            .filter { it.estado != com.rifaapp.core.domain.model.EstadoNumero.DISPONIBLE }
+                                            .map { it.valor }
+                                            .toSet()
+                                        val bitmap = withContext(Dispatchers.IO) {
+                                            generarBitmapGrilla(rifaCaptura, ocupados)
+                                        }
+                                        val archivo = withContext(Dispatchers.IO) {
+                                            val f = File(context.cacheDir, "rifa_grilla.png")
+                                            FileOutputStream(f).use { salida ->
+                                                bitmap.compress(Bitmap.CompressFormat.PNG, 100, salida)
+                                            }
+                                            f
+                                        }
+                                        withContext(Dispatchers.Main) {
+                                            try {
+                                                val uri = FileProvider.getUriForFile(
+                                                    context,
+                                                    "${context.packageName}.fileprovider",
+                                                    archivo,
+                                                )
+                                                val intent = Intent(Intent.ACTION_SEND).apply {
+                                                    type = "image/png"
+                                                    putExtra(Intent.EXTRA_STREAM, uri)
+                                                    putExtra(Intent.EXTRA_TEXT, "Grilla de la rifa ${rifaCaptura.titulo}")
+                                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                }
+                                                val whatsapp = Intent(intent).setPackage("com.whatsapp")
+                                                if (whatsapp.resolveActivity(context.packageManager) != null) {
+                                                    context.startActivity(whatsapp)
+                                                } else {
+                                                    context.startActivity(Intent.createChooser(intent, "Enviar grilla"))
+                                                }
+                                            } catch (e: Exception) {
+                                                // Silencioso: evita crash si no hay app para compartir.
+                                            } finally {
+                                                enviando = false
+                                            }
+                                        }
+                                    }
+                                },
+                                enabled = !enviando,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(if (enviando) "Preparando imagen..." else "Compartir grilla")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+if (mostrarColores) {
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { mostrarColores = false },
+            properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = true),
+        ) {
+            androidx.compose.material3.Surface(
+                shape = RoundedCornerShape(20.dp),
+                tonalElevation = 8.dp,
+            ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Elegir colores del tema", style = MaterialTheme.typography.titleMedium)
+                    listOf(
+                        ThemeColor.AUTO to "Material You (automático)",
+                        ThemeColor.PURPLE to "Morado",
+                        ThemeColor.BLUE to "Azul",
+                        ThemeColor.GREEN to "Verde",
+                        ThemeColor.RED to "Rojo",
+                        ThemeColor.ORANGE to "Naranja",
+                        ThemeColor.TEAL to "Turquesa",
+                    ).forEach { (color, label) ->
+                        FilterChip(
+                            selected = themeColor == color,
+                            onClick = {
+                                onThemeColorChange(color)
+                                mostrarColores = false
+                            },
+                            label = { Text(label) },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                    TextButton(onClick = { mostrarColores = false }, modifier = Modifier.align(Alignment.End)) {
+                        Text("Cerrar")
+                    }
+                }
+            }
+        }
     }
 
 Scaffold(
@@ -282,6 +509,16 @@ Scaffold(
                 onClick = {
                     descripcionTmp = formulario.descripcion
                     mostrarDescripcion = true
+                },
+            )
+            Spacer(Modifier.height(16.dp))
+
+            CampoAjuste(
+                etiqueta = "Lotería (opcional)",
+                texto = if (formulario.loteria.isBlank()) "Lotería con la que se juega" else formulario.loteria,
+                onClick = {
+                    loteriaTmp = formulario.loteria
+                    mostrarLoteria = true
                 },
             )
             Spacer(Modifier.height(16.dp))
@@ -355,6 +592,37 @@ Scaffold(
             Spacer(Modifier.height(24.dp))
 
             Text(
+                text = "Tema",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(
+                    ThemeMode.AUTO to "Automático",
+                    ThemeMode.LIGHT to "Claro",
+                    ThemeMode.DARK to "Oscuro",
+                ).forEach { (mode, label) ->
+                    FilterChip(
+                        selected = themeMode == mode,
+                        onClick = { onThemeModeChange(mode) },
+                        label = { Text(label) },
+                    )
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = { mostrarColores = true }, modifier = Modifier.fillMaxWidth()) {
+                Text("Personalizar colores del tema")
+            }
+            Text(
+                text = "Elige una paleta de colores para la app.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            Text(
                 text = "Respaldo",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -377,6 +645,20 @@ Scaffold(
             Spacer(Modifier.height(16.dp))
 
             OutlinedButton(
+                onClick = { mostrarCaptura = true },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Vista para captura (grilla)")
+            }
+            Text(
+                text = "Abre una grilla con colores legibles para tomar captura de pantalla.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            OutlinedButton(
                 onClick = { confirmarRestaurar = true },
                 enabled = !state.guardando,
                 modifier = Modifier.fillMaxWidth(),
@@ -387,4 +669,69 @@ Scaffold(
             Spacer(Modifier.height(16.dp))
         }
     }
+}
+private fun generarBitmapGrilla(rifa: com.rifaapp.core.domain.model.Rifa, ocupados: Set<Int>): android.graphics.Bitmap {
+    val columnas = rifa.columnas.coerceIn(1, 12)
+    val total = rifa.cantidadNumeros.coerceAtLeast(1)
+    val filas = (total + columnas - 1) / columnas
+    val cellSize = 180
+    val padding = 12
+    val margin = 32
+    val width = columnas * cellSize + margin * 2
+    val height = filas * cellSize + margin * 2
+    val bitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(bitmap)
+    canvas.drawColor(android.graphics.Color.WHITE)
+
+    val fondoPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { style = android.graphics.Paint.Style.FILL }
+    val textoPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+        textAlign = android.graphics.Paint.Align.CENTER
+        textSize = cellSize * 0.34f
+    }
+    val esquina = cellSize * 0.12f
+
+    for (i in 0 until total) {
+        val valor = rifa.numeroInicio + i
+        val fila = i / columnas
+        val columna = i % columnas
+        val izquierda = columna * cellSize + padding + margin
+        val arriba = fila * cellSize + padding + margin
+        val derecha = (columna + 1) * cellSize - padding + margin
+        val abajo = (fila + 1) * cellSize - padding + margin
+        val ocupado = valor in ocupados
+        val etiqueta = rifa.formatear(valor)
+
+        fondoPaint.color = if (ocupado) 0xFFF2F2F2.toInt() else 0xFFE8F5E9.toInt()
+        canvas.drawRoundRect(
+            izquierda.toFloat(),
+            arriba.toFloat(),
+            derecha.toFloat(),
+            abajo.toFloat(),
+            esquina,
+            esquina,
+            fondoPaint,
+        )
+
+        val centroX = (izquierda + derecha) / 2f
+        val centroY = (arriba + abajo) / 2f
+        val baseLine = centroY - (textoPaint.descent() + textoPaint.ascent()) / 2f
+
+        if (ocupado) {
+            textoPaint.color = android.graphics.Color.GRAY
+            textoPaint.flags = textoPaint.flags or android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
+            canvas.drawText(etiqueta, centroX, baseLine, textoPaint)
+
+            textoPaint.flags = textoPaint.flags and android.graphics.Paint.STRIKE_THRU_TEXT_FLAG.inv()
+            textoPaint.color = android.graphics.Color.RED
+            textoPaint.textSize = cellSize * 0.5f
+            canvas.drawText("X", centroX, baseLine, textoPaint)
+            textoPaint.textSize = cellSize * 0.34f
+        } else {
+            textoPaint.color = 0xFF2E7D32.toInt()
+            textoPaint.flags = textoPaint.flags and android.graphics.Paint.STRIKE_THRU_TEXT_FLAG.inv()
+            canvas.drawText(etiqueta, centroX, baseLine, textoPaint)
+        }
+    }
+
+    return bitmap
 }

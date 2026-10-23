@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import com.rifaapp.core.domain.repository.BoletaRepository
 import com.rifaapp.core.domain.model.Cliente
 import com.rifaapp.core.domain.model.Boleta
+import com.rifaapp.core.domain.validation.ValidadorTelefono
 class TableroViewModel(
     private val observarTablero: ObservarTablero,
     private val reservarNumero: ReservarNumero,
@@ -101,13 +102,30 @@ class TableroViewModel(
 
     fun editar(nombre: String, telefono: String, montoPagoCentavos: Long?) {
         val boleta = state.value.detalle?.boleta ?: return
+        if (nombre.isBlank()) {
+            mensaje.value = ErrorDominio.NombreVacio.textoVisible()
+            return
+        }
+        val telefonoNormalizado = ValidadorTelefono.normalizar(telefono)
+            ?: run {
+                mensaje.value = ErrorDominio.TelefonoInvalido.textoVisible()
+                return
+            }
+
         viewModelScope.launch {
-            val actualizada = boleta.copy(cliente = Cliente(nombre.trim(), telefono.trim()))
+            val actualizada = boleta.copy(cliente = Cliente(nombre.trim(), telefonoNormalizado))
             when (val resultado = boletas.guardar(actualizada)) {
                 is Resultado.Exito -> {
-                    val monto = montoPagoCentavos
-                    if (monto != null && monto != boleta.montoPagado) {
-                        boletas.actualizarMontoPagado(boleta.id, monto)
+                    // Si el campo de monto viene vacío, se conserva el pago actual.
+                    // Si viene informado (incluido 0), se reemplaza el total pagado.
+                    if (montoPagoCentavos != null && montoPagoCentavos != boleta.montoPagado) {
+                        when (val pagoResultado = boletas.actualizarMontoPagado(boleta.id, montoPagoCentavos.coerceAtLeast(0L))) {
+                            is Resultado.Exito -> Unit
+                            is Resultado.Fallo -> {
+                                mensaje.value = pagoResultado.error.textoVisible()
+                                return@launch
+                            }
+                        }
                     }
                     mensaje.value = "Información actualizada"
                 }

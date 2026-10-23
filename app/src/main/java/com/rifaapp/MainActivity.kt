@@ -32,7 +32,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.isSystemInDarkTheme
 import com.rifaapp.core.designsystem.theme.RifaAppTheme
+import com.rifaapp.core.designsystem.theme.ThemeColor
+import com.rifaapp.core.designsystem.theme.ThemeMode
 import com.rifaapp.feature.config.ConfigRifaScreen
 import com.rifaapp.feature.config.ConfigRifaViewModel
 import com.rifaapp.feature.rifa.TableroScreen
@@ -47,7 +50,18 @@ class MainActivity : ComponentActivity() {
         val application = this.application as RifaApp
 
         setContent {
-            RifaAppTheme {
+            val themeMode by application.themePreferences.mode.collectAsStateWithLifecycle(
+                initialValue = ThemeMode.AUTO,
+            )
+            val themeColor by application.themePreferences.color.collectAsStateWithLifecycle(
+                initialValue = ThemeColor.AUTO,
+            )
+            val darkTheme = when (themeMode) {
+                ThemeMode.AUTO -> isSystemInDarkTheme()
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+            }
+            RifaAppTheme(darkTheme = darkTheme, themeColor = themeColor) {
                 val container by application.containerFlow.collectAsStateWithLifecycle(
                     initialValue = null,
                 )
@@ -58,7 +72,13 @@ class MainActivity : ComponentActivity() {
                     return@RifaAppTheme
                 }
 
-                MainContainer(readyContainer)
+                MainContainer(
+                    container = readyContainer,
+                    themeMode = themeMode,
+                    themeColor = themeColor,
+                    onThemeModeChange = { application.themePreferences.setMode(it) },
+                    onThemeColorChange = { application.themePreferences.setColor(it) },
+                )
             }
         }
     }
@@ -75,7 +95,13 @@ private fun BoxLoading() {
 }
 
 @Composable
-private fun MainContainer(container: AppContainer) {
+private fun MainContainer(
+    container: AppContainer,
+    themeMode: ThemeMode,
+    themeColor: ThemeColor,
+    onThemeModeChange: (ThemeMode) -> Unit,
+    onThemeColorChange: (ThemeColor) -> Unit,
+) {
     var pantalla by rememberSaveable { mutableStateOf(Pantalla.TABLERO) }
 
     BackHandler(enabled = pantalla == Pantalla.CONFIGURACION) {
@@ -132,6 +158,10 @@ private fun MainContainer(container: AppContainer) {
 
                 ConfigRifaScreen(
                     state = state,
+                    themeMode = themeMode,
+                    themeColor = themeColor,
+                    onThemeModeChange = onThemeModeChange,
+                    onThemeColorChange = onThemeColorChange,
                     modifier = contentModifier,
                     onVolver = { pantalla = Pantalla.TABLERO },
                     onGenerarRespaldo = { viewModel.generarRespaldoJson() },

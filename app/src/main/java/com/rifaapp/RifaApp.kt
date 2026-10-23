@@ -38,9 +38,13 @@ class RifaApp : Application() {
     private val _container = MutableStateFlow<AppContainer?>(null)
     val containerFlow: StateFlow<AppContainer?> = _container.asStateFlow()
 
+    lateinit var themePreferences: ThemePreferences
+        private set
+
     override fun onCreate() {
         super.onCreate()
         instance = this
+        themePreferences = ThemePreferences(this)
 
         scope.launch {
             _container.value = AppContainer(this@RifaApp)
@@ -65,7 +69,12 @@ class AppContainer(application: Application) {
                 override fun migrate(db: SupportSQLiteDatabase) {
                     db.execSQL("ALTER TABLE rifa ADD COLUMN columnas INTEGER NOT NULL DEFAULT 5")
                 }
-            }
+            },
+            object : Migration(2, 3) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("ALTER TABLE rifa ADD COLUMN loteria TEXT")
+                }
+            },
         )
         .fallbackToDestructiveMigration()
         .build()
