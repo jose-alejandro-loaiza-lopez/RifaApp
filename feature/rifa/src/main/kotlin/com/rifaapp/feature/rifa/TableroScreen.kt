@@ -230,7 +230,6 @@ fun TableroScreen(
                             onCerrar = {},
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End,
@@ -270,7 +269,6 @@ fun TableroScreen(
                             onLimpiarFiltros = onLimpiarFiltros,
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End,
