@@ -116,9 +116,10 @@ fun ConfigRifaScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
+
         ) {
             if (rifa == null) {
                 Text("Cargando configuración…")

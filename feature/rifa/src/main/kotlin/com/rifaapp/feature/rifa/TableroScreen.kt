@@ -142,7 +142,7 @@ fun TableroScreen(
                 Text("No hay una rifa configurada todavía.")
             }
 
-            else -> Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            else -> Column(modifier = Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
                 state.resumen?.let { ResumenRifa(it) }
 
                 LazyVerticalGrid(
