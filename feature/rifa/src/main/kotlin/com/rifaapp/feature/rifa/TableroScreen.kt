@@ -205,7 +205,7 @@ fun TableroScreen(
         androidx.compose.material3.AlertDialog(
             onDismissRequest = onCerrarDetalle,
             text = { DetalleContenido(rifa = rifa, detalle = detalle, onReservar = onReservar, onAbonar = onAbonar, onLiberar = onLiberar) },
-            confirmButton = { TextButton(onClick = onCerrarDetalle) { Text("Cerrar") } },
+            confirmButton = { },
         )
     }
 
@@ -384,7 +384,7 @@ private fun DetalleContenido(
             .fillMaxWidth()
             .verticalScroll(scrollState)
             .padding(horizontal = 20.dp)
-            .padding(bottom = 8.dp),
+            .padding(bottom = 0.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
