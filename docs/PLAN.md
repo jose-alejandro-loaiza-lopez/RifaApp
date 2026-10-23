@@ -204,7 +204,7 @@ source/       RifaLocalDataSource, BoletaLocalDataSource, PagoLocalDataSource
 ### Fase 2 — Persistencia
 - [x] Room: `RifaEntity`, `BoletaEntity`, `PagoEntity`
 - [x] DAOs con `Flow`
-- [ ] Migraciones desde versión 1
+- [ ] Migraciones desde versión 1 (no necesaria mientras la app esté en v1)
 - [x] Repositorios implementados + mappers
 - [x] Seed inicial: rifa de ejemplo y 3 boletas demo en AppContainer
 
@@ -237,6 +237,7 @@ source/       RifaLocalDataSource, BoletaLocalDataSource, PagoLocalDataSource
 3. ✅ **Una rifa activa** a la vez.
 4. ✅ Cancelar la participación = **liberar el número** → vuelve a `DISPONIBLE` (con historial).
 5. ✅ Rango de números **configurable**, `00`–`99` por defecto.
+6. ✅ Room v1 se siembra en `AppContainer` y usa `fallbackToDestructiveMigration()` por ahora (pendiente migración formal).
 
 ---
 
