@@ -35,7 +35,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        // Edge-to-edge deshabilitado para no dejar espacio vacío arriba/abajo.
+        // try without edge to edge first
+        // enableEdgeToEdge()
 
         val container = (application as RifaApp).container
 
@@ -65,7 +67,7 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                 ) { padding ->
-                    val contentModifier = Modifier.padding(padding)
+                    val contentModifier = Modifier.padding(bottom = padding.calculateBottomPadding())
                     when (pantalla) {
                         Pantalla.TABLERO -> {
                             val viewModel: TableroViewModel = viewModel(factory = container.tableroViewModelFactory)
