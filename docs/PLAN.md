@@ -15,6 +15,7 @@
 - Liberar un número cuando el cliente ya no quiere participar.
 - Configuración de la rifa editable en cualquier momento: qué se rifa, fecha del sorteo, precio de la boleta, rango de números.
 - Envío de mensaje por WhatsApp mediante deep link local (`wa.me`).
+- Exportar/importar respaldo completo de la rifa y boletas en formato JSON.
 - Resumen en vivo: disponibles / reservados / abonados / pagados y total recaudado.
 
 **Fuera de v1 (anotado para después):**

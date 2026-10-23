@@ -134,6 +134,8 @@ private fun MainContainer(container: AppContainer) {
                     state = state,
                     modifier = contentModifier,
                     onVolver = { pantalla = Pantalla.TABLERO },
+                    onGenerarRespaldo = { viewModel.generarRespaldoJson() },
+                    onImportarRespaldo = { json -> viewModel.importarRespaldoJson(json) },
                     onGuardar = viewModel::guardar,
                     onRestaurar = viewModel::restaurarPorDefecto,
                     onConsumirMensaje = viewModel::consumirMensaje,

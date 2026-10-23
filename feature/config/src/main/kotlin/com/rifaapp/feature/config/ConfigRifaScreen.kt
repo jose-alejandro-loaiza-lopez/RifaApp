@@ -31,7 +31,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -52,6 +57,8 @@ private val FORMATO_FECHA: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/M
 fun ConfigRifaScreen(
     state: ConfigRifaUiState,
     onVolver: () -> Unit,
+    onGenerarRespaldo: suspend () -> String? = { null },
+    onImportarRespaldo: suspend (String) -> Unit = {},
     onGuardar: (FormularioRifa) -> Unit,
     onRestaurar: () -> Unit,
     onConsumirMensaje: () -> Unit,
@@ -83,6 +90,25 @@ fun ConfigRifaScreen(
 
     var mostrarFecha by remember { mutableStateOf(false) }
     var confirmarRestaurar by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val exportarLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            onGenerarRespaldo()?.let { json ->
+                context.contentResolver.openOutputStream(uri, "wt")?.use { it.write(json.toByteArray(Charsets.UTF_8)) }
+            }
+        }
+    }
+    val importarLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                onImportarRespaldo(input.bufferedReader().readText())
+            }
+        }
+    }
 
     var mostrarTitulo by remember { mutableStateOf(false) }
     var tituloTmp by remember { mutableStateOf("") }
@@ -327,6 +353,28 @@ Scaffold(
             )
 
             Spacer(Modifier.height(24.dp))
+
+            Text(
+                text = "Respaldo",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedButton(onClick = { exportarLauncher.launch("rifaapp-respaldo.json") }, modifier = Modifier.weight(1f)) {
+                    Text("Exportar")
+                }
+                OutlinedButton(onClick = { importarLauncher.launch(arrayOf("application/json")) }, modifier = Modifier.weight(1f)) {
+                    Text("Importar")
+                }
+            }
+            Text(
+                text = "Guarda o restaura toda la rifa en formato JSON.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(Modifier.height(16.dp))
 
             OutlinedButton(
                 onClick = { confirmarRestaurar = true },
