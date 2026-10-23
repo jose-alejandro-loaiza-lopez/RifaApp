@@ -229,7 +229,7 @@ fun TableroScreen(
     if (mostrarFiltros) {
         androidx.compose.ui.window.Dialog(
             onDismissRequest = { mostrarFiltros = false },
-            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+            properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = true, usePlatformDefaultWidth = false),
         ) {
             BoxWithConstraints(
                 modifier = Modifier.fillMaxSize().imePadding(),
@@ -254,7 +254,7 @@ fun TableroScreen(
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(bottom = 8.dp),
+                                .padding(start = 12.dp, end = 12.dp, bottom = 8.dp),
                         )
                         FiltrosTablero(
                             busqueda = state.busqueda,
