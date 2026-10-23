@@ -19,8 +19,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rifaapp.core.designsystem.theme.RifaAppTheme
@@ -67,7 +69,7 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                 ) { padding ->
-                    val contentModifier = Modifier.padding(bottom = padding.calculateBottomPadding())
+                    val contentModifier = Modifier.padding(bottom = 16.dp)
                     when (pantalla) {
                         Pantalla.TABLERO -> {
                             val viewModel: TableroViewModel = viewModel(factory = container.tableroViewModelFactory)
