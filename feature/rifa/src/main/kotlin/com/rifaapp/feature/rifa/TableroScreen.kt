@@ -248,6 +248,14 @@ fun TableroScreen(
                             .verticalScroll(rememberScrollState())
                             .padding(top = 16.dp, bottom = 8.dp),
                     ) {
+                        Text(
+                            text = "Filtrar números",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                        )
                         FiltrosTablero(
                             busqueda = state.busqueda,
                             estadosFiltrados = state.estadosFiltrados,
