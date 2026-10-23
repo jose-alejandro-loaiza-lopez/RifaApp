@@ -1,7 +1,9 @@
 package com.rifaapp.feature.rifa
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.view.WindowManager
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -68,6 +70,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.rifaapp.core.domain.model.Boleta
 import com.rifaapp.core.designsystem.formatearPrecio
@@ -189,6 +192,15 @@ fun TableroScreen(
 
     val rifa = state.rifa
     val detalle = state.detalle
+    val view = LocalView.current
+    LaunchedEffect(detalle != null) {
+        val window = (view.context as? Activity)?.window ?: return@LaunchedEffect
+        if (detalle != null) {
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+        } else {
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        }
+    }
     if (rifa != null && detalle != null) {
         androidx.compose.material3.AlertDialog(
             onDismissRequest = onCerrarDetalle,
@@ -371,7 +383,6 @@ private fun DetalleContenido(
         modifier = Modifier
             .fillMaxWidth()
             .verticalScroll(scrollState)
-            .imePadding()
             .padding(horizontal = 20.dp)
             .padding(bottom = 32.dp),
     ) {
