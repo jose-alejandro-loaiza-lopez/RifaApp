@@ -77,7 +77,7 @@ fun TableroScreen(
     state: TableroUiState,
     onNumeroClick: (Int) -> Unit,
     onCerrarDetalle: () -> Unit,
-    onReservar: (String, String) -> Unit,
+    onReservar: (String, String, Long?) -> Unit,
     onAbonar: (Long) -> Unit,
     onLiberar: () -> Unit,
     onConsumirMensaje: () -> Unit,
@@ -325,12 +325,13 @@ private fun EstadoNumero.nombreLegible(): String = when (this) {
 private fun DetalleContenido(
     rifa: Rifa,
     detalle: DetalleNumero,
-    onReservar: (String, String) -> Unit,
+    onReservar: (String, String, Long?) -> Unit,
     onAbonar: (Long) -> Unit,
     onLiberar: () -> Unit,
 ) {
     var nombre by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
+    var montoPago by remember { mutableStateOf("") }
     var mostrarDialogoAbono by remember { mutableStateOf(false) }
     var mostrarDialogoLiberar by remember { mutableStateOf(false) }
 
@@ -376,10 +377,22 @@ private fun DetalleContenido(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = montoPago,
+                onValueChange = { montoPago = it },
+                label = { Text("Abono inicial (opcional)") },
+                placeholder = { Text("0") },
+                prefix = { Text("$") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
-                onClick = { onReservar(nombre, telefono) },
+                onClick = { onReservar(nombre, telefono, parsearPesosACentavos(montoPago)) },
                 enabled = nombre.isNotBlank() && telefono.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
             ) {
@@ -613,7 +626,7 @@ private fun TableroPreview() {
             ),
             onNumeroClick = {},
             onCerrarDetalle = {},
-            onReservar = { _, _ -> },
+            onReservar = { _, _, _ -> },
             onAbonar = {},
             onLiberar = {},
             onConsumirMensaje = {},

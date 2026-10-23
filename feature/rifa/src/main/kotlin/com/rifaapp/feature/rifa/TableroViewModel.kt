@@ -91,16 +91,30 @@ class TableroViewModel(
     fun toggleEstado(est: EstadoNumero) { estadosFiltrados.value = estadosFiltrados.value.toMutableSet().apply { if (this.contains(est)) remove(est) else add(est) } }
     fun limpiarFiltros() { busqueda.value = ""; estadosFiltrados.value = emptySet() }
 
-    fun reservar(nombre: String, telefono: String) {
+fun reservar(nombre: String, telefono: String, montoPagoCentavos: Long? = null) {
         val rifa = state.value.rifa ?: return
         val numero = seleccionado.value ?: return
 
         viewModelScope.launch {
             when (val resultado = reservarNumero(rifa, numero, nombre, telefono)) {
                 is Resultado.Exito -> {
-                    mensaje.value = "Número ${rifa.formatear(numero)} reservado para ${nombre.trim()}"
+                    val boleta = resultado.valor
+                    val monto = montoPagoCentavos ?: 0L
+                    if (monto > 0L) {
+                        when (registrarPago(boleta.id, monto)) {
+                            is Resultado.Exito ->
+                                mensaje.value =
+                                    "Número ${rifa.formatear(numero)} reservado para ${nombre.trim()} con abono de ${formatearPrecio(monto)}"
+                            is Resultado.Fallo ->
+                                mensaje.value =
+                                    "Número ${rifa.formatear(numero)} reservado. El pago no se pudo registrar."
+                        }
+                    } else {
+                        mensaje.value = "Número ${rifa.formatear(numero)} reservado para ${nombre.trim()}"
+                    }
                     seleccionado.value = null
                 }
+
                 is Resultado.Fallo -> mensaje.value = resultado.error.textoVisible()
             }
         }
