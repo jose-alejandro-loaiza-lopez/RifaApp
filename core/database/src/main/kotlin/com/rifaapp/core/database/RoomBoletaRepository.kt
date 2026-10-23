@@ -9,7 +9,6 @@ import com.rifaapp.core.domain.repository.BoletaRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import java.time.Instant
 
@@ -18,7 +17,7 @@ class RoomBoletaRepository(
 ) : BoletaRepository {
 
     override fun observarPorRifa(rifaId: Long): Flow<List<Boleta>> =
-        dao.observarPorRifa(rifaId).map { lista -> lista.map { it.toDomain() } }.flowOn(Dispatchers.IO)
+        dao.observarPorRifa(rifaId).map { lista -> lista.map { it.toDomain() } }
 
     override suspend fun obtenerPorRifa(rifaId: Long): List<Boleta> = withContext(Dispatchers.IO) {
         dao.obtenerPorRifa(rifaId).map { it.toDomain() }

@@ -6,7 +6,6 @@ import com.rifaapp.core.domain.model.Rifa
 import com.rifaapp.core.domain.repository.RifaRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -15,7 +14,7 @@ class RoomRifaRepository(
 ) : RifaRepository {
 
     override fun observarActiva(): Flow<Rifa?> =
-        dao.observarActiva().map { it?.toDomain() }.flowOn(Dispatchers.Default)
+        dao.observarActiva().map { it?.toDomain() }
 
     override suspend fun obtenerActiva(): Rifa? = withContext(Dispatchers.IO) {
         dao.obtenerActiva()?.toDomain()

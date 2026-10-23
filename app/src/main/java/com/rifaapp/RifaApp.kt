@@ -21,33 +21,16 @@ import com.rifaapp.feature.config.ConfigRifaViewModel
 import com.rifaapp.feature.rifa.TableroViewModel
 import java.time.Instant
 import java.time.LocalDate
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class RifaApp : Application() {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val _container = MutableStateFlow<AppContainer?>(null)
-    val containerFlow: StateFlow<AppContainer?> = _container.asStateFlow()
+    lateinit var container: AppContainer
+        private set
 
     override fun onCreate() {
         super.onCreate()
-        instance = this
-
-        scope.launch {
-            _container.value = AppContainer(this@RifaApp)
-        }
-    }
-
-    companion object {
-        lateinit var instance: RifaApp
-            private set
+        container = AppContainer(this)
     }
 }
 
