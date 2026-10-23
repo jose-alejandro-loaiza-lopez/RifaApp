@@ -35,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -100,6 +101,10 @@ fun TableroScreen(
     }
 
     var mostrarFiltros by remember { mutableStateOf(false) }
+
+    val detalleSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val filtrosSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -171,7 +176,7 @@ fun TableroScreen(
     val rifa = state.rifa
     val detalle = state.detalle
     if (rifa != null && detalle != null) {
-        ModalBottomSheet(onDismissRequest = onCerrarDetalle) {
+        ModalBottomSheet(onDismissRequest = onCerrarDetalle, sheetState = detalleSheetState) {
             DetalleContenido(
                 rifa = rifa,
                 detalle = detalle,
@@ -183,7 +188,7 @@ fun TableroScreen(
     }
 
     if (mostrarFiltros) {
-        ModalBottomSheet(onDismissRequest = { mostrarFiltros = false }) {
+        ModalBottomSheet(onDismissRequest = { mostrarFiltros = false }, sheetState = filtrosSheetState) {
             FiltrosTablero(
                 busqueda = state.busqueda,
                 estadosFiltrados = state.estadosFiltrados,
