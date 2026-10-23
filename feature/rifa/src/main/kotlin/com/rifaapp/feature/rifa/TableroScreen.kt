@@ -204,8 +204,8 @@ fun TableroScreen(
     if (rifa != null && detalle != null) {
         androidx.compose.material3.AlertDialog(
             onDismissRequest = onCerrarDetalle,
-            text = { DetalleContenido(rifa = rifa, detalle = detalle, onReservar = onReservar, onAbonar = onAbonar, onLiberar = onLiberar) },
-            confirmButton = { TextButton(onClick = onCerrarDetalle) { Text("Cerrar") } },
+            text = { DetalleContenido(rifa = rifa, detalle = detalle, onReservar = onReservar, onAbonar = onAbonar, onLiberar = onLiberar, onCerrar = onCerrarDetalle) },
+            confirmButton = { },
         )
     }
 
@@ -367,6 +367,7 @@ private fun DetalleContenido(
     onReservar: (String, String, Long?) -> Unit,
     onAbonar: (Long) -> Unit,
     onLiberar: () -> Unit,
+    onCerrar: () -> Unit = {},
 ) {
     var nombre by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
@@ -478,6 +479,11 @@ private fun DetalleContenido(
                 Text("Liberar número")
             }
         }
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        TextButton(onClick = onCerrar) { Text("Cerrar") }
     }
 
     if (mostrarDialogoAbono) {
@@ -633,11 +639,11 @@ private fun FiltrosTablero(
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
-        TextButton(
-            onClick = onCerrar,
+        Row(
             modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
         ) {
-            Text("Listo")
+            TextButton(onClick = onCerrar) { Text("Listo") }
         }
     }
 }
