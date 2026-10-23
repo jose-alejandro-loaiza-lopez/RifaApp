@@ -113,6 +113,8 @@ fun TableroScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         topBar = {
             TopAppBar(
                 title = {
@@ -262,8 +264,7 @@ private fun Contador(
 ) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(fondo)
+            .background(fondo, RoundedCornerShape(10.dp))
             .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -297,8 +298,7 @@ private fun CeldaNumero(
         modifier = Modifier
             .semantics { contentDescription = "$etiqueta, ${estado.nombreLegible()}" }
             .aspectRatio(1f)
-            .clip(RoundedCornerShape(10.dp))
-            .background(fondo)
+            .background(fondo, RoundedCornerShape(10.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
