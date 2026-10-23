@@ -24,6 +24,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.CircularProgressIndicator
@@ -91,6 +95,8 @@ fun TableroScreen(
         onConsumirMensaje()
     }
 
+    var mostrarFiltros by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -111,7 +117,9 @@ fun TableroScreen(
                     }
                 },
                 actions = {
-                    TextButton(onClick = onAbrirConfig) { Text("Ajustes") }
+                    IconButton(onClick = { mostrarFiltros = true }) {
+                        Icon(imageVector = Icons.Filled.Search, contentDescription = "Filtrar números")
+                    }
                 },
             )
         },
@@ -136,14 +144,6 @@ fun TableroScreen(
 
             else -> Column(modifier = Modifier.fillMaxSize().padding(padding)) {
                 state.resumen?.let { ResumenRifa(it) }
-
-                FiltrosTablero(
-                    busqueda = state.busqueda,
-                    estadosFiltrados = state.estadosFiltrados,
-                    onBusquedaChange = onBusquedaChange,
-                    onToggleEstado = onToggleEstado,
-                    onLimpiarFiltros = onLimpiarFiltros,
-                )
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(5),
@@ -175,6 +175,19 @@ fun TableroScreen(
                 onAbonar = onAbonar,
                 onLiberar = onLiberar,
             )
+        }
+    }
+
+    if (mostrarFiltros) {
+        ModalBottomSheet(onDismissRequest = { mostrarFiltros = false }) {
+            FiltrosTablero(
+                busqueda = state.busqueda,
+                estadosFiltrados = state.estadosFiltrados,
+                onBusquedaChange = onBusquedaChange,
+                onToggleEstado = onToggleEstado,
+                onLimpiarFiltros = onLimpiarFiltros,
+            )
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

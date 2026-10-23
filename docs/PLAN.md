@@ -214,7 +214,7 @@ source/       RifaLocalDataSource, BoletaLocalDataSource, PagoLocalDataSource
 - [x] Detalle/venta con formulario validado (reservar, abonar, liberar)
 - [x] Filtros del tablero (por estado, número, cliente/celular)
 - [x] `feature:config` ajustes de la rifa (título, precio, fecha, rango)
-- [ ] Navegación (type-safe routes)
+- [x] Navegación (BottomBar interna: Tablero/Ajustes)
 - [x] Preview del tablero
 
 ### Fase 4 — Integraciones locales
