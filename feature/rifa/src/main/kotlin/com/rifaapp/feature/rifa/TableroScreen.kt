@@ -1,9 +1,7 @@
 package com.rifaapp.feature.rifa
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.view.WindowManager
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +12,7 @@ import androidx.compose.foundation.layout.FlowRow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -39,8 +38,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -70,7 +67,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.rifaapp.core.domain.model.Boleta
 import com.rifaapp.core.designsystem.formatearPrecio
@@ -111,10 +107,6 @@ fun TableroScreen(
     }
 
     var mostrarFiltros by remember { mutableStateOf(false) }
-
-    val detalleSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val filtrosSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -192,34 +184,27 @@ fun TableroScreen(
 
     val rifa = state.rifa
     val detalle = state.detalle
-    val view = LocalView.current
-    LaunchedEffect(detalle != null) {
-        val window = (view.context as? Activity)?.window ?: return@LaunchedEffect
-        if (detalle != null) {
-            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-        } else {
-            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-        }
-    }
     if (rifa != null && detalle != null) {
         androidx.compose.ui.window.Dialog(
             onDismissRequest = onCerrarDetalle,
             properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
         ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
+            BoxWithConstraints(
+                modifier = Modifier.fillMaxSize().imePadding(),
                 contentAlignment = Alignment.Center,
             ) {
-                Column(
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 8.dp,
                     modifier = Modifier
                         .fillMaxWidth(0.92f)
-                        .padding(16.dp),
+                        .heightIn(max = maxHeight * 0.9f),
                 ) {
-                    Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        color = MaterialTheme.colorScheme.surface,
-                        tonalElevation = 8.dp,
-                        modifier = Modifier.fillMaxWidth(),
+                    Column(
+                        modifier = Modifier
+                            .verticalScroll(rememberScrollState())
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
                     ) {
                         DetalleContenido(
                             rifa = rifa,
@@ -229,12 +214,12 @@ fun TableroScreen(
                             onLiberar = onLiberar,
                             onCerrar = {},
                         )
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                    ) {
-                        TextButton(onClick = onCerrarDetalle) { Text("Cerrar") }
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(end = 12.dp),
+                            horizontalArrangement = Arrangement.End,
+                        ) {
+                            TextButton(onClick = onCerrarDetalle) { Text("Cerrar") }
+                        }
                     }
                 }
             }
@@ -246,20 +231,22 @@ fun TableroScreen(
             onDismissRequest = { mostrarFiltros = false },
             properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
         ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
+            BoxWithConstraints(
+                modifier = Modifier.fillMaxSize().imePadding(),
                 contentAlignment = Alignment.Center,
             ) {
-                Column(
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 8.dp,
                     modifier = Modifier
                         .fillMaxWidth(0.92f)
-                        .padding(16.dp),
+                        .heightIn(max = maxHeight * 0.9f),
                 ) {
-                    Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        color = MaterialTheme.colorScheme.surface,
-                        tonalElevation = 8.dp,
-                        modifier = Modifier.fillMaxWidth(),
+                    Column(
+                        modifier = Modifier
+                            .verticalScroll(rememberScrollState())
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
                     ) {
                         FiltrosTablero(
                             busqueda = state.busqueda,
@@ -268,12 +255,12 @@ fun TableroScreen(
                             onToggleEstado = onToggleEstado,
                             onLimpiarFiltros = onLimpiarFiltros,
                         )
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                    ) {
-                        TextButton(onClick = { mostrarFiltros = false }) { Text("Listo") }
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(end = 12.dp),
+                            horizontalArrangement = Arrangement.End,
+                        ) {
+                            TextButton(onClick = { mostrarFiltros = false }) { Text("Listo") }
+                        }
                     }
                 }
             }
@@ -731,4 +718,5 @@ private fun TableroPreview() {
         )
     }
 }
+
 
