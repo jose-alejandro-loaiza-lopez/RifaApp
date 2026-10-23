@@ -205,7 +205,7 @@ fun TableroScreen(
         androidx.compose.material3.AlertDialog(
             onDismissRequest = onCerrarDetalle,
             text = { DetalleContenido(rifa = rifa, detalle = detalle, onReservar = onReservar, onAbonar = onAbonar, onLiberar = onLiberar) },
-            confirmButton = { },
+            confirmButton = { TextButton(onClick = onCerrarDetalle) { Text("Cerrar") } },
         )
     }
 
