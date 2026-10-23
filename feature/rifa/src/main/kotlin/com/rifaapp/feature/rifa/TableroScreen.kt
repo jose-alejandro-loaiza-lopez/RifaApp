@@ -24,9 +24,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -46,7 +46,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material3.FilterChip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -74,6 +78,9 @@ fun TableroScreen(
     onLiberar: () -> Unit,
     onConsumirMensaje: () -> Unit,
     onAbrirConfig: () -> Unit,
+    onBusquedaChange: (String) -> Unit,
+    onToggleEstado: (EstadoNumero) -> Unit,
+    onLimpiarFiltros: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -130,6 +137,14 @@ fun TableroScreen(
             else -> Column(modifier = Modifier.fillMaxSize().padding(padding)) {
                 state.resumen?.let { ResumenRifa(it) }
 
+                FiltrosTablero(
+                    busqueda = state.busqueda,
+                    estadosFiltrados = state.estadosFiltrados,
+                    onBusquedaChange = onBusquedaChange,
+                    onToggleEstado = onToggleEstado,
+                    onLimpiarFiltros = onLimpiarFiltros,
+                )
+
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(5),
                     modifier = Modifier.fillMaxSize(),
@@ -137,7 +152,7 @@ fun TableroScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    items(state.numeros, key = { it.valor }) { numero ->
+                    items(state.numerosVisibles, key = { it.valor }) { numero ->
                         CeldaNumero(
                             etiqueta = rifa.formatear(numero.valor),
                             estado = numero.estado,
@@ -245,6 +260,7 @@ private fun CeldaNumero(
 
     Box(
         modifier = Modifier
+            .semantics { contentDescription = "$etiqueta, ${estado.nombreLegible()}" }
             .aspectRatio(1f)
             .clip(RoundedCornerShape(10.dp))
             .background(fondo)
@@ -511,6 +527,46 @@ private fun abrirWhatsApp(context: Context, telefonoE164: String, mensaje: Strin
     runCatching { context.startActivity(intent) }
 }
 
+@Composable
+private fun FiltrosTablero(
+    busqueda: String,
+    estadosFiltrados: Set<EstadoNumero>,
+    onBusquedaChange: (String) -> Unit,
+    onToggleEstado: (EstadoNumero) -> Unit,
+    onLimpiarFiltros: () -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
+        OutlinedTextField(
+            value = busqueda,
+            onValueChange = onBusquedaChange,
+            label = { Text("Buscar (número, nombre o celular)") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            listOf(EstadoNumero.DISPONIBLE, EstadoNumero.RESERVADO, EstadoNumero.ABONADO, EstadoNumero.PAGADO)
+                .forEach { estado ->
+                    FilterChip(
+                        selected = estado in estadosFiltrados,
+                        onClick = { onToggleEstado(estado) },
+                        label = { Text(estado.nombreLegible()) },
+                    )
+                }
+            if (busqueda.isNotBlank() || estadosFiltrados.isNotEmpty()) {
+                FilterChip(
+                    selected = false,
+                    onClick = onLimpiarFiltros,
+                    label = { Text("Limpiar filtros") },
+                )
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun TableroPreview() {
@@ -549,6 +605,9 @@ private fun TableroPreview() {
             onLiberar = {},
             onConsumirMensaje = {},
             onAbrirConfig = {},
+            onBusquedaChange = {},
+            onToggleEstado = {},
+            onLimpiarFiltros = {},
         )
     }
 }

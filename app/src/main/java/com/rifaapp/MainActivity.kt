@@ -49,9 +49,11 @@ class MainActivity : ComponentActivity() {
                             onLiberar = viewModel::liberar,
                             onConsumirMensaje = viewModel::consumirMensaje,
                             onAbrirConfig = { pantalla = Pantalla.CONFIGURACION },
+                            onBusquedaChange = viewModel::onBusquedaChange,
+                            onToggleEstado = viewModel::toggleEstado,
+                            onLimpiarFiltros = viewModel::limpiarFiltros,
                         )
                     }
-
                     Pantalla.CONFIGURACION -> {
                         val viewModel: ConfigRifaViewModel = viewModel(factory = container.configViewModelFactory)
                         val state by viewModel.state.collectAsStateWithLifecycle()

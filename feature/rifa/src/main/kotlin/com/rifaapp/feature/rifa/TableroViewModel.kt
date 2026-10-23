@@ -27,10 +27,14 @@ class TableroViewModel(
 
     private val seleccionado = MutableStateFlow<Int?>(null)
     private val mensaje = MutableStateFlow<String?>(null)
+    private val busqueda = MutableStateFlow("")
+    private val estadosFiltrados = MutableStateFlow<Set<EstadoNumero>>(emptySet())
 
     val state: StateFlow<TableroUiState> =
-        combine(observarTablero(), seleccionado, mensaje) { tablero, numeroSeleccionado, texto ->
+        combine(observarTablero(), seleccionado, mensaje, busqueda, estadosFiltrados) { tablero, numeroSeleccionado, texto, query, estados ->
             val rifa = tablero?.rifa
+            val todosLosNumeros = tablero?.numeros.orEmpty()
+            val boletas = tablero?.boletas.orEmpty()
 
             val detalle = if (tablero != null && rifa != null && numeroSeleccionado != null) {
                 DetalleNumero(
@@ -40,19 +44,37 @@ class TableroViewModel(
                         .firstOrNull { it.valor == numeroSeleccionado }
                         ?.estado
                         ?: EstadoNumero.DISPONIBLE,
-                    boleta = tablero.boletas.firstOrNull { it.numero == numeroSeleccionado },
+                    boleta = boletas.firstOrNull { it.numero == numeroSeleccionado },
                     precio = rifa.precioBoleta,
                 )
             } else {
                 null
             }
 
+            val queryLower = query.trim().lowercase()
+            val numerosVisibles = todosLosNumeros.filter { numero ->
+                val pasaEstado = estados.isEmpty() || numero.estado in estados
+                val pasaBusqueda = if (queryLower.isEmpty()) true else {
+                    val etiqueta = (rifa?.formatear(numero.valor) ?: "").lowercase()
+                    if (etiqueta.contains(queryLower)) true
+                    else boletas.firstOrNull { it.numero == numero.valor }?.cliente?.let { cliente ->
+                        cliente.nombre.lowercase().contains(queryLower) ||
+                            cliente.telefonoE164.lowercase().contains(queryLower)
+                    } ?: false
+                }
+                pasaEstado && pasaBusqueda
+            }
+
             TableroUiState(
                 cargando = false,
                 rifa = rifa,
-                numeros = tablero?.numeros.orEmpty(),
+                numeros = todosLosNumeros,
+                numerosVisibles = numerosVisibles,
+                boletas = boletas,
                 resumen = tablero?.resumen,
                 detalle = detalle,
+                busqueda = query,
+                estadosFiltrados = estados,
                 mensaje = texto,
             )
         }.stateIn(
@@ -61,17 +83,13 @@ class TableroViewModel(
             initialValue = TableroUiState(),
         )
 
-    fun seleccionar(numero: Int) {
-        seleccionado.value = numero
-    }
+    fun seleccionar(numero: Int) { seleccionado.value = numero }
+    fun cerrarDetalle() { seleccionado.value = null }
+    fun consumirMensaje() { mensaje.value = null }
 
-    fun cerrarDetalle() {
-        seleccionado.value = null
-    }
-
-    fun consumirMensaje() {
-        mensaje.value = null
-    }
+    fun onBusquedaChange(texto: String) { busqueda.value = texto }
+    fun toggleEstado(est: EstadoNumero) { estadosFiltrados.value = estadosFiltrados.value.toMutableSet().apply { if (this.contains(est)) remove(est) else add(est) } }
+    fun limpiarFiltros() { busqueda.value = ""; estadosFiltrados.value = emptySet() }
 
     fun reservar(nombre: String, telefono: String) {
         val rifa = state.value.rifa ?: return
@@ -83,7 +101,6 @@ class TableroViewModel(
                     mensaje.value = "Número ${rifa.formatear(numero)} reservado para ${nombre.trim()}"
                     seleccionado.value = null
                 }
-
                 is Resultado.Fallo -> mensaje.value = resultado.error.textoVisible()
             }
         }
@@ -110,11 +127,8 @@ class TableroViewModel(
                     mensaje.value = "Número ${detalle.etiqueta} liberado"
                     seleccionado.value = null
                 }
-
                 is Resultado.Fallo -> mensaje.value = resultado.error.textoVisible()
             }
         }
     }
 }
-
-

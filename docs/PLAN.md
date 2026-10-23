@@ -212,7 +212,7 @@ source/       RifaLocalDataSource, BoletaLocalDataSource, PagoLocalDataSource
 - [x] `designsystem`: tema, `NumeroChip`, `EstadoBadge`, `ContadorResumen` parcial (tema + formatos + mensajes de error)
 - [x] `feature:rifa` tablero con grilla 5×20, resumen y detalle
 - [x] Detalle/venta con formulario validado (reservar, abonar, liberar)
-- [ ] Filtros del tablero (por estado, por número/cliente)
+- [x] Filtros del tablero (por estado, número, cliente/celular)
 - [x] `feature:config` ajustes de la rifa (título, precio, fecha, rango)
 - [ ] Navegación (type-safe routes)
 - [x] Preview del tablero
