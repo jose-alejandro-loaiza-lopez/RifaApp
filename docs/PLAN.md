@@ -189,16 +189,17 @@ source/       RifaLocalDataSource, BoletaLocalDataSource, PagoLocalDataSource
 - [x] Módulo `:app` compilando e instalado en el Xiaomi
 - [x] Repo git conectado a `github.com/jose-alejandro-loaiza-lopez/RifaApp`
 - [x] Core library desugaring (`java.time` en API 24+)
-- [ ] Módulos `:core:*` y `:feature:*` con sus build.gradle.kts
+- [x] Módulo `:core:domain` (Kotlin puro, sin Android)
+- [ ] Módulos `:core:data`, `:core:database` y `:feature:*`
 - [ ] `build-logic` (convention plugins) para no repetir configuración
 
 ### Fase 1 — Dominio
-- [ ] Modelos: `Rifa`, `Numero`, `Boleta`, `Cliente`, `Pago`, `EstadoNumero`
-- [ ] `EstadoNumero.desde()` + tests de borde
-- [ ] Reglas de transición y validaciones
-- [ ] Interfaces de repositorio
-- [ ] Casos de uso + tests con repos fake
-- [ ] Validador de teléfono E.164 y de montos
+- [x] Modelos: `Rifa`, `Numero`, `Boleta`, `Cliente`, `Pago`, `EstadoNumero`
+- [x] `EstadoNumero.desde()` + tests de borde
+- [x] Reglas de transición y validaciones
+- [x] Interfaces de repositorio
+- [x] Casos de uso + tests con repos fake
+- [x] Validador de teléfono E.164 y de montos
 
 ### Fase 2 — Persistencia
 - [ ] Room: `RifaEntity`, `NumeroEntity`, `BoletaEntity`, `PagoEntity`, `MovimientoEntity`

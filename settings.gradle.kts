@@ -15,4 +15,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "RifaApp"
+
 include(":app")
+include(":core:domain")
