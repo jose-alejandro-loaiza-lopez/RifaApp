@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.rifaapp.core.designsystem.textoVisible
 import com.rifaapp.core.domain.common.Resultado
 import com.rifaapp.core.domain.model.Rifa
+import com.rifaapp.core.domain.repository.BoletaRepository
 import com.rifaapp.core.domain.usecase.GuardarConfiguracionRifa
 import com.rifaapp.core.domain.usecase.ObservarTablero
+import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +18,7 @@ import kotlinx.coroutines.launch
 
 class ConfigRifaViewModel(
     observarTablero: ObservarTablero,
+    private val boletas: BoletaRepository,
     private val guardarConfiguracion: GuardarConfiguracionRifa,
 ) : ViewModel() {
 
@@ -24,12 +27,12 @@ class ConfigRifaViewModel(
     private val mensaje = MutableStateFlow<String?>(null)
 
     val state: StateFlow<ConfigRifaUiState> =
-        combine(observarTablero(), guardado, guardando, mensaje) { tablero, ok, guardando, texto ->
+        combine(observarTablero(), guardado, guardando, mensaje) { tablero, ok, g, texto ->
             ConfigRifaUiState(
                 cargando = false,
-                rifa = tablero?.rifa ?: rifaPorDefecto(),
+                rifa = tablero?.rifa ?: rifaPorDefecto(1L),
                 guardado = ok,
-                guardando = guardando,
+                guardando = g,
                 mensaje = texto,
             )
         }
@@ -45,31 +48,31 @@ class ConfigRifaViewModel(
         val precio = formulario.precioCentavos
         val inicio = formulario.numeroInicioTexto.toIntOrNull()
         val fin = formulario.numeroFinTexto.toIntOrNull()
-        if (rifaActual != null && precio == null) {
+        if (precio == null) {
             mensaje.value = "El precio debe ser un número válido."
             return
         }
-        if (precio != null && (inicio == null || fin == null)) {
+        if (inicio == null || fin == null) {
             mensaje.value = "El rango debe ser numérico."
             return
         }
-        if (inicio != null && fin != null && fin < inicio) {
+        if (fin < inicio) {
             mensaje.value = "El fin debe ser mayor o igual que el inicio."
             return
         }
 
         val digitos = maxOf(
-            (inicio ?: 0).toString().length,
-            (fin ?: 99).toString().length,
+            inicio.toString().length,
+            fin.toString().length,
         ).coerceAtLeast(1)
 
-        val nueva = (rifaActual ?: rifaPorDefecto()).copy(
+        val nueva = rifaActual.copy(
             titulo = formulario.titulo.trim(),
             descripcion = formulario.descripcion.trim(),
-            precioBoleta = precio ?: rifaActual?.precioBoleta ?: 0L,
+            precioBoleta = precio,
             fechaSorteo = formulario.fechaSorteo,
-            numeroInicio = inicio ?: 0,
-            numeroFin = fin ?: 99,
+            numeroInicio = inicio,
+            numeroFin = fin,
             cantidadDigitos = digitos,
         )
 
@@ -87,6 +90,36 @@ class ConfigRifaViewModel(
         }
     }
 
+    fun restaurarPorDefecto() {
+        val rifaActual = state.value.rifa ?: return
+
+        viewModelScope.launch {
+            guardando.value = true
+            runCatching {
+                boletas.obtenerPorRifa(rifaActual.id).forEach { boletas.liberar(it.id) }
+            }
+            val defaultRifa = Rifa(
+                id = rifaActual.id,
+                titulo = "Rifa del combo familiar",
+                descripcion = "Rifa de ejemplo",
+                fechaSorteo = LocalDate.of(2026, 12, 24),
+                precioBoleta = 1_000_000L,
+                numeroInicio = 0,
+                numeroFin = 99,
+                cantidadDigitos = 2,
+            )
+            when (val resultado = guardarConfiguracion(defaultRifa)) {
+                is Resultado.Exito -> {
+                    guardado.value = true
+                    mensaje.value = "Rifa restaurada por defecto"
+                }
+
+                is Resultado.Fallo -> mensaje.value = resultado.error.textoVisible()
+            }
+            guardando.value = false
+        }
+    }
+
     fun consumirMensaje() {
         mensaje.value = null
     }
@@ -95,8 +128,14 @@ class ConfigRifaViewModel(
         guardado.value = false
     }
 
-    private fun rifaPorDefecto(): Rifa = Rifa(
+    private fun rifaPorDefecto(id: Long): Rifa = Rifa(
+        id = id,
         titulo = "Rifa del combo familiar",
-        precioBoleta = 0L,
+        descripcion = "Rifa de ejemplo",
+        fechaSorteo = LocalDate.of(2026, 12, 24),
+        precioBoleta = 1_000_000L,
+        numeroInicio = 0,
+        numeroFin = 99,
+        cantidadDigitos = 2,
     )
 }

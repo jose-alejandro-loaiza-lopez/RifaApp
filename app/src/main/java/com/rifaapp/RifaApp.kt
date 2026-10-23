@@ -95,7 +95,7 @@ class AppContainer(application: Application) {
 
     val configViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
         initializer {
-            ConfigRifaViewModel(observarTablero, guardarConfiguracion)
+            ConfigRifaViewModel(observarTablero, boletas, guardarConfiguracion)
         }
     }
 }

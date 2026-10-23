@@ -98,6 +98,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = contentModifier,
                                 onVolver = { pantalla = Pantalla.TABLERO },
                                 onGuardar = viewModel::guardar,
+                                onRestaurar = viewModel::restaurarPorDefecto,
                                 onConsumirMensaje = viewModel::consumirMensaje,
                                 onConsumirGuardado = viewModel::consumirGuardado,
                             )

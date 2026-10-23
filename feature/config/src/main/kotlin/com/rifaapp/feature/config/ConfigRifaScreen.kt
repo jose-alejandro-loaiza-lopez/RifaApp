@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -49,6 +51,7 @@ fun ConfigRifaScreen(
     state: ConfigRifaUiState,
     onVolver: () -> Unit,
     onGuardar: (FormularioRifa) -> Unit,
+    onRestaurar: () -> Unit,
     onConsumirMensaje: () -> Unit,
     onConsumirGuardado: () -> Unit,
     modifier: Modifier = Modifier,
@@ -75,6 +78,24 @@ fun ConfigRifaScreen(
     }
 
     var mostrarFecha by remember { mutableStateOf(false) }
+    var confirmarRestaurar by remember { mutableStateOf(false) }
+
+    if (confirmarRestaurar) {
+        AlertDialog(
+            onDismissRequest = { confirmarRestaurar = false },
+            title = { Text("Restaurar por defecto") },
+            text = { Text("Se eliminarán las boletas actuales y se pondrá la rifa de ejemplo otra vez.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmarRestaurar = false
+                    onRestaurar()
+                }) { Text("Restaurar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmarRestaurar = false }) { Text("Cancelar") }
+            },
+        )
+    }
 
     if (mostrarFecha) {
         val datePickerState = androidx.compose.material3.rememberDatePickerState(
@@ -102,16 +123,14 @@ fun ConfigRifaScreen(
         }
     }
 
-    Scaffold(
+Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = { Text("Configuración de la rifa") },
-                navigationIcon = {
-                    TextButton(onClick = onVolver) { Text("Volver") }
-                },
             )
         },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
@@ -221,6 +240,18 @@ fun ConfigRifaScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(if (state.guardando) "Guardando…" else "Guardar cambios")
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            Spacer(Modifier.height(8.dp))
+
+            OutlinedButton(
+                onClick = { confirmarRestaurar = true },
+                enabled = !state.guardando,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Restaurar por defecto")
             }
 
             Spacer(Modifier.height(8.dp))
