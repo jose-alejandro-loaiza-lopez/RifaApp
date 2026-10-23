@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.rifaapp.core.database.RoomBoletaRepository
 import com.rifaapp.core.database.RoomRifaRepository
 import com.rifaapp.core.database.AppDatabase
@@ -57,7 +59,16 @@ class AppContainer(application: Application) {
         application,
         AppDatabase::class.java,
         "rifa.db",
-    ).fallbackToDestructiveMigration().build()
+    )
+        .addMigrations(
+            object : Migration(1, 2) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("ALTER TABLE rifa ADD COLUMN columnas INTEGER NOT NULL DEFAULT 5")
+                }
+            }
+        )
+        .fallbackToDestructiveMigration()
+        .build()
 
     private val rifas = RoomRifaRepository(database.rifaDao())
     private val boletas = RoomBoletaRepository(database.boletaDao())
