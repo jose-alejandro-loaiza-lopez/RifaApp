@@ -37,17 +37,18 @@ class TableroViewModel(
             val rifa = tablero?.rifa
             val todosLosNumeros = tablero?.numeros.orEmpty()
             val boletas = tablero?.boletas.orEmpty()
+            val boletasPorNumero = boletas.associateBy { it.numero }
             val etiquetas = todosLosNumeros.associate { numero -> numero.valor to (rifa?.formatear(numero.valor) ?: numero.valor.toString()) }
 
             val detalle = if (tablero != null && rifa != null && numeroSeleccionado != null) {
                 DetalleNumero(
                     numero = numeroSeleccionado,
                     etiqueta = rifa.formatear(numeroSeleccionado),
-                    estado = tablero.numeros
+                    estado = todosLosNumeros
                         .firstOrNull { it.valor == numeroSeleccionado }
                         ?.estado
                         ?: EstadoNumero.DISPONIBLE,
-                    boleta = boletas.firstOrNull { it.numero == numeroSeleccionado },
+                    boleta = boletasPorNumero[numeroSeleccionado],
                     precio = rifa.precioBoleta,
                 )
             } else {
@@ -55,7 +56,6 @@ class TableroViewModel(
             }
 
             val queryLower = query.trim().lowercase()
-            val boletasPorNumero = boletas.associateBy { it.numero }
             val numerosVisibles = todosLosNumeros.filter { numero ->
                 val pasaEstado = estados.isEmpty() || numero.estado in estados
                 val pasaBusqueda = if (queryLower.isEmpty()) true else {
@@ -83,7 +83,7 @@ class TableroViewModel(
             )
         }.flowOn(Dispatchers.Default).stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.Eagerly,
             initialValue = TableroUiState(),
         )
 
