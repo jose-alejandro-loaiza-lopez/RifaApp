@@ -1,11 +1,13 @@
 package com.rifaapp.feature.rifa
 
+import androidx.compose.runtime.Immutable
 import com.rifaapp.core.domain.model.Boleta
 import com.rifaapp.core.domain.model.EstadoNumero
 import com.rifaapp.core.domain.model.Numero
 import com.rifaapp.core.domain.model.Resumen
 import com.rifaapp.core.domain.model.Rifa
 
+@Immutable
 data class TableroUiState(
     val cargando: Boolean = true,
     val rifa: Rifa? = null,
@@ -19,6 +21,7 @@ data class TableroUiState(
     val mensaje: String? = null,
 )
 
+@Immutable
 data class DetalleNumero(
     val numero: Int,
     val etiqueta: String,

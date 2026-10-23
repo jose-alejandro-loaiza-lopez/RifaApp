@@ -164,7 +164,11 @@ fun TableroScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    items(state.numerosVisibles, key = { it.valor }) { numero ->
+                    items(
+                    items = state.numerosVisibles,
+                    key = { it.valor },
+                    contentType = { "numero" },
+                ) { numero ->
                         val onClick = remember(numero.valor, onNumeroClick) { { onNumeroClick(numero.valor) } }
                         CeldaNumero(
                             etiqueta = rifa.formatear(numero.valor),
