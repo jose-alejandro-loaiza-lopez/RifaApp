@@ -19,6 +19,7 @@ rootProject.name = "RifaApp"
 include(":app")
 include(":core:domain")
 include(":core:data")
+include(":core:database")
 include(":core:designsystem")
 include(":feature:rifa")
 include(":feature:config")

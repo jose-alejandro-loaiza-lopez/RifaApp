@@ -190,8 +190,7 @@ source/       RifaLocalDataSource, BoletaLocalDataSource, PagoLocalDataSource
 - [x] Repo git conectado a `github.com/jose-alejandro-loaiza-lopez/RifaApp`
 - [x] Core library desugaring (`java.time` en API 24+)
 - [x] Módulo `:core:domain` (Kotlin puro, sin Android)
-- [x] Módulos `:core:data` (repos en memoria) y `:feature:rifa`
-- [ ] Módulo `:core:database` y `:feature:config`
+- [x] Módulos `:core:data`, `:core:database` y `:feature:*`
 - [ ] `build-logic` (convention plugins) para no repetir configuración
 
 ### Fase 1 — Dominio
@@ -203,11 +202,11 @@ source/       RifaLocalDataSource, BoletaLocalDataSource, PagoLocalDataSource
 - [x] Validador de teléfono E.164 y de montos
 
 ### Fase 2 — Persistencia
-- [ ] Room: `RifaEntity`, `NumeroEntity`, `BoletaEntity`, `PagoEntity`, `MovimientoEntity`
-- [ ] DAOs con `Flow`
+- [x] Room: `RifaEntity`, `BoletaEntity`, `PagoEntity`
+- [x] DAOs con `Flow`
 - [ ] Migraciones desde versión 1
-- [ ] Repositorios implementados + mappers
-- [ ] Seed inicial: rifa de ejemplo con 100 números en `DISPONIBLE`
+- [x] Repositorios implementados + mappers
+- [x] Seed inicial: rifa de ejemplo y 3 boletas demo en AppContainer
 
 ### Fase 3 — UI
 - [x] `designsystem`: tema, `NumeroChip`, `EstadoBadge`, `ContadorResumen` parcial (tema + formatos + mensajes de error)

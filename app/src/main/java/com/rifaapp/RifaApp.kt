@@ -4,11 +4,13 @@ import android.app.Application
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.rifaapp.core.data.InMemoryBoletaRepository
-import com.rifaapp.core.data.InMemoryRifaRepository
+import androidx.room.Room
+import com.rifaapp.core.database.RoomBoletaRepository
+import com.rifaapp.core.database.RoomRifaRepository
+import com.rifaapp.core.database.AppDatabase
+import com.rifaapp.core.domain.common.Resultado
 import com.rifaapp.core.domain.model.Boleta
 import com.rifaapp.core.domain.model.Cliente
-import com.rifaapp.core.domain.model.Pago
 import com.rifaapp.core.domain.model.Rifa
 import com.rifaapp.core.domain.usecase.GuardarConfiguracionRifa
 import com.rifaapp.core.domain.usecase.LiberarNumero
@@ -19,6 +21,7 @@ import com.rifaapp.feature.config.ConfigRifaViewModel
 import com.rifaapp.feature.rifa.TableroViewModel
 import java.time.Instant
 import java.time.LocalDate
+import kotlinx.coroutines.runBlocking
 
 class RifaApp : Application() {
 
@@ -27,54 +30,51 @@ class RifaApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        container = AppContainer()
+        container = AppContainer(this)
     }
 }
 
-/**
- * Inyección de dependencias manual: el único punto que conoce las implementaciones.
- * Cuando entre Room, solo cambia esta clase.
- */
-class AppContainer {
+class AppContainer(application: Application) {
 
-    private val rifas = InMemoryRifaRepository(
-        rifaInicial = Rifa(
-            id = 1L,
-            titulo = "Rifa del combo familiar",
-            descripcion = "Rifa de ejemplo",
-            fechaSorteo = LocalDate.of(2026, 12, 24),
-            precioBoleta = 1_000_000L,
-        ),
-    )
+    private val database = Room.databaseBuilder(
+        application,
+        AppDatabase::class.java,
+        "rifa.db",
+    ).fallbackToDestructiveMigration().build()
 
-    private val boletas = InMemoryBoletaRepository(
-        boletasIniciales = listOf(
-            Boleta(
-                id = 1L,
-                rifaId = 1L,
-                numero = 7,
-                cliente = Cliente("Ana Torres", "+573001112233"),
-            ),
-            Boleta(
-                id = 2L,
-                rifaId = 1L,
-                numero = 12,
-                cliente = Cliente("Luis Pérez", "+573004445566"),
-                pagos = listOf(
-                    Pago(id = 1L, boletaId = 2L, monto = 400_000L, fecha = Instant.now()),
-                ),
-            ),
-            Boleta(
-                id = 3L,
-                rifaId = 1L,
-                numero = 23,
-                cliente = Cliente("Marta Gómez", "+573007778899"),
-                pagos = listOf(
-                    Pago(id = 2L, boletaId = 3L, monto = 1_000_000L, fecha = Instant.now()),
-                ),
-            ),
-        ),
-    )
+    private val rifas = RoomRifaRepository(database.rifaDao())
+    private val boletas = RoomBoletaRepository(database.boletaDao())
+
+    init {
+        runBlocking {
+            if (rifas.obtenerActiva() == null) {
+                rifas.guardar(
+                    Rifa(
+                        titulo = "Rifa del combo familiar",
+                        fechaSorteo = LocalDate.of(2026, 12, 24),
+                        precioBoleta = 1_000_000L,
+                    )
+                )
+                val rifaId = rifas.obtenerActiva()?.id ?: 1L
+                listOf(
+                    Triple(7, "Ana Torres", 0L),
+                    Triple(12, "Luis Pérez", 400_000L),
+                    Triple(23, "Marta Gómez", 1_000_000L),
+                ).forEach { (numero, nombre, pagado) ->
+                    val id = (boletas.guardar(
+                        Boleta(
+                            rifaId = rifaId,
+                            numero = numero,
+                            cliente = Cliente(nombre, "+57300${100_000_000 + numero}"),
+                        )
+                    ) as Resultado.Exito<Boleta>).valor.id
+                    if (pagado > 0L) {
+                        boletas.registrarPago(id, pagado, Instant.now(), null)
+                    }
+                }
+            }
+        }
+    }
 
     private val observarTablero = ObservarTablero(rifas, boletas)
     private val reservarNumero = ReservarNumero(boletas)

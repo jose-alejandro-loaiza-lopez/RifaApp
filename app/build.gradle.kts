@@ -6,7 +6,6 @@ plugins {
 android {
     namespace = "com.rifaapp"
     compileSdk = 37
-    // API 37 se publica con versión menor (platforms/android-37.0)
     compileSdkMinor = 0
 
     defaultConfig {
@@ -51,6 +50,7 @@ dependencies {
     implementation(composeBom)
 
     implementation(project(":core:domain"))
+    implementation(project(":core:database"))
     implementation(project(":core:data"))
     implementation(project(":core:designsystem"))
     implementation(project(":feature:rifa"))
@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.room.runtime)
 
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)

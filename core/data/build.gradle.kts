@@ -1,7 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    // La versión se declara en el build raíz (apply false).
     id("org.jetbrains.kotlin.jvm")
     `java-library`
 }
