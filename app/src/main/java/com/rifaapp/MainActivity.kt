@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -87,13 +91,13 @@ private fun MainContainer(container: AppContainer) {
                 NavigationBarItem(
                     selected = pantalla == Pantalla.TABLERO,
                     onClick = { pantalla = Pantalla.TABLERO },
-                    icon = { Text("T", fontWeight = FontWeight.Bold) },
+                    icon = { Icon(Icons.Filled.Home, contentDescription = "Tablero") },
                     label = { Text("Tablero") },
                 )
                 NavigationBarItem(
                     selected = pantalla == Pantalla.CONFIGURACION,
                     onClick = { pantalla = Pantalla.CONFIGURACION },
-                    icon = { Text("A", fontWeight = FontWeight.Bold) },
+                    icon = { Icon(Icons.Filled.Settings, contentDescription = "Ajustes") },
                     label = { Text("Ajustes") },
                 )
             }
