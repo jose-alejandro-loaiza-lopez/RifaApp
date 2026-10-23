@@ -5,7 +5,6 @@ import androidx.room.TypeConverter
 import java.time.Instant
 import java.time.LocalDate
 
-@ProvidedTypeConverter
 class Converters {
 
     @TypeConverter

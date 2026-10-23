@@ -68,7 +68,7 @@ fun ConfigRifaScreen(
     }
 
     val rifa = state.rifa
-    var formulario by rememberSaveable(rifa) {
+    var formulario by remember(rifa) {
         val inicial = rifa?.let { FormularioRifa.desde(it) } ?: FormularioRifa()
         mutableStateOf(inicial)
     }
