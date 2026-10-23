@@ -204,7 +204,7 @@ fun TableroScreen(
                     Column(
                         modifier = Modifier
                             .verticalScroll(rememberScrollState())
-                            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
+                            .padding(top = 16.dp, bottom = 8.dp),
                     ) {
                         DetalleContenido(
                             rifa = rifa,
@@ -246,7 +246,7 @@ fun TableroScreen(
                     Column(
                         modifier = Modifier
                             .verticalScroll(rememberScrollState())
-                            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
+                            .padding(top = 16.dp, bottom = 8.dp),
                     ) {
                         FiltrosTablero(
                             busqueda = state.busqueda,
