@@ -141,6 +141,7 @@ Scaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
+                .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
             if (rifa == null) {
