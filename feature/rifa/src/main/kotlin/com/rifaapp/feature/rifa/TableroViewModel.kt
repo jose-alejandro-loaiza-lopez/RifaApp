@@ -14,7 +14,9 @@ import com.rifaapp.core.domain.usecase.ReservarNumero
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -35,6 +37,7 @@ class TableroViewModel(
             val rifa = tablero?.rifa
             val todosLosNumeros = tablero?.numeros.orEmpty()
             val boletas = tablero?.boletas.orEmpty()
+            val etiquetas = todosLosNumeros.associate { numero -> numero.valor to (rifa?.formatear(numero.valor) ?: numero.valor.toString()) }
 
             val detalle = if (tablero != null && rifa != null && numeroSeleccionado != null) {
                 DetalleNumero(
@@ -52,12 +55,13 @@ class TableroViewModel(
             }
 
             val queryLower = query.trim().lowercase()
+            val boletasPorNumero = boletas.associateBy { it.numero }
             val numerosVisibles = todosLosNumeros.filter { numero ->
                 val pasaEstado = estados.isEmpty() || numero.estado in estados
                 val pasaBusqueda = if (queryLower.isEmpty()) true else {
                     val etiqueta = (rifa?.formatear(numero.valor) ?: "").lowercase()
                     if (etiqueta.contains(queryLower)) true
-                    else boletas.firstOrNull { it.numero == numero.valor }?.cliente?.let { cliente ->
+                    else boletasPorNumero[numero.valor]?.cliente?.let { cliente ->
                         cliente.nombre.lowercase().contains(queryLower) ||
                             cliente.telefonoE164.lowercase().contains(queryLower)
                     } ?: false
@@ -77,7 +81,7 @@ class TableroViewModel(
                 estadosFiltrados = estados,
                 mensaje = texto,
             )
-        }.stateIn(
+        }.flowOn(Dispatchers.Default).stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = TableroUiState(),
@@ -146,3 +150,4 @@ fun reservar(nombre: String, telefono: String, montoPagoCentavos: Long? = null) 
         }
     }
 }
+

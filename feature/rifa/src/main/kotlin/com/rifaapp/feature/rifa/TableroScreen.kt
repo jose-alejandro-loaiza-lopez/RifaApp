@@ -6,6 +6,8 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.FlowRow
 
 import androidx.compose.foundation.layout.Arrangement
@@ -111,6 +113,8 @@ fun TableroScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         topBar = {
             TopAppBar(
                 title = {
@@ -164,11 +168,16 @@ fun TableroScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    items(state.numerosVisibles, key = { it.valor }) { numero ->
+                    items(
+                    items = state.numerosVisibles,
+                    key = { it.valor },
+                    contentType = { "numero" },
+                ) { numero ->
+                        val onClick = remember(numero.valor, onNumeroClick) { { onNumeroClick(numero.valor) } }
                         CeldaNumero(
-                            etiqueta = rifa.formatear(numero.valor),
+                            etiqueta = state.etiquetas[numero.valor] ?: rifa.formatear(numero.valor),
                             estado = numero.estado,
-                            onClick = { onNumeroClick(numero.valor) },
+                            onClick = onClick,
                         )
                     }
                 }
@@ -255,8 +264,7 @@ private fun Contador(
 ) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(fondo)
+            .background(fondo, RoundedCornerShape(10.dp))
             .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -281,14 +289,16 @@ private fun CeldaNumero(
     estado: EstadoNumero,
     onClick: () -> Unit,
 ) {
-    val (fondo, texto) = coloresEstado(estado)
+    val colorScheme = MaterialTheme.colorScheme
+    val colorPair = remember(estado, colorScheme) { coloresEstadoSincrono(estado, colorScheme) }
+    val fondo = colorPair.first
+    val texto = colorPair.second
 
     Box(
         modifier = Modifier
             .semantics { contentDescription = "$etiqueta, ${estado.nombreLegible()}" }
             .aspectRatio(1f)
-            .clip(RoundedCornerShape(10.dp))
-            .background(fondo)
+            .background(fondo, RoundedCornerShape(10.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -301,17 +311,19 @@ private fun CeldaNumero(
     }
 }
 
-@Composable
-private fun coloresEstado(estado: EstadoNumero): Pair<Color, Color> = when (estado) {
-    EstadoNumero.DISPONIBLE -> MaterialTheme.colorScheme.surfaceVariant to MaterialTheme.colorScheme.onSurfaceVariant
-    EstadoNumero.RESERVADO -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.onTertiaryContainer
-    EstadoNumero.ABONADO -> MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
-    EstadoNumero.PAGADO -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+private fun coloresEstadoSincrono(
+    estado: EstadoNumero,
+    scheme: androidx.compose.material3.ColorScheme,
+): Pair<Color, Color> = when (estado) {
+    EstadoNumero.DISPONIBLE -> scheme.surfaceVariant to scheme.onSurfaceVariant
+    EstadoNumero.RESERVADO -> scheme.tertiaryContainer to scheme.onTertiaryContainer
+    EstadoNumero.ABONADO -> scheme.secondaryContainer to scheme.onSecondaryContainer
+    EstadoNumero.PAGADO -> scheme.primary to scheme.onPrimary
 }
 
 @Composable
 private fun EtiquetaEstado(estado: EstadoNumero) {
-    val (fondo, texto) = coloresEstado(estado)
+    val (fondo, texto) = coloresEstadoSincrono(estado, MaterialTheme.colorScheme)
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
@@ -350,9 +362,11 @@ private fun DetalleContenido(
     val context = LocalContext.current
     val boleta = detalle.boleta
 
+    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .verticalScroll(scrollState)
             .imePadding()
             .padding(horizontal = 20.dp)
             .padding(bottom = 32.dp),

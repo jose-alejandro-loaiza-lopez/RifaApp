@@ -6,8 +6,10 @@ import com.rifaapp.core.domain.repository.BoletaRepository
 import com.rifaapp.core.domain.repository.RifaRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
 /** Observa la rifa activa y sus boletas, emitiendo el tablero ya armado. */
@@ -20,7 +22,7 @@ class ObservarTablero(
         if (rifa == null) {
             flowOf(null)
         } else {
-            boletas.observarPorRifa(rifa.id).map { lista -> rifa.construirTablero(lista) }
+            boletas.observarPorRifa(rifa.id).map { lista -> rifa.construirTablero(lista) }.flowOn(Dispatchers.Default)
         }
-    }
+    }.flowOn(Dispatchers.Default)
 }

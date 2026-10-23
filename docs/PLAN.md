@@ -259,3 +259,9 @@ adb shell am start -n com.rifaapp/.MainActivity
 > En IntelliJ: `Gradle JVM` debe ser **21**, no el 25.
 > En HyperOS: activar **Opciones de desarrollador → Instalar por USB**, y aceptar el
 > diálogo de instalación en el teléfono (si no, `installDebug` falla con `INSTALL_FAILED_USER_RESTRICTED`).
+
+### Actualizaciones de rendimiento (reciente)
+- [x] Arranque sin bloqueo del hilo principal: seed en coroutine IO + containerFlow + estado de carga.
+- [x] Pipeline de Flows con lowOn(Dispatchers.Default) y .flowOn(Dispatchers.IO) para transformaciones.
+- [x] Cache de callbacks en celdas y measure startup 680ms cold.
+
