@@ -171,7 +171,7 @@ fun TableroScreen(
                 ) { numero ->
                         val onClick = remember(numero.valor, onNumeroClick) { { onNumeroClick(numero.valor) } }
                         CeldaNumero(
-                            etiqueta = rifa.formatear(numero.valor),
+                            etiqueta = state.etiquetas[numero.valor] ?: rifa.formatear(numero.valor),
                             estado = numero.estado,
                             onClick = onClick,
                         )
@@ -286,7 +286,10 @@ private fun CeldaNumero(
     estado: EstadoNumero,
     onClick: () -> Unit,
 ) {
-    val (fondo, texto) = coloresEstado(estado)
+    val colorScheme = MaterialTheme.colorScheme
+    val colorPair = remember(estado, colorScheme) { coloresEstadoSincrono(estado, colorScheme) }
+    val fondo = colorPair.first
+    val texto = colorPair.second
 
     Box(
         modifier = Modifier
@@ -306,17 +309,19 @@ private fun CeldaNumero(
     }
 }
 
-@Composable
-private fun coloresEstado(estado: EstadoNumero): Pair<Color, Color> = when (estado) {
-    EstadoNumero.DISPONIBLE -> MaterialTheme.colorScheme.surfaceVariant to MaterialTheme.colorScheme.onSurfaceVariant
-    EstadoNumero.RESERVADO -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.onTertiaryContainer
-    EstadoNumero.ABONADO -> MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
-    EstadoNumero.PAGADO -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+private fun coloresEstadoSincrono(
+    estado: EstadoNumero,
+    scheme: androidx.compose.material3.ColorScheme,
+): Pair<Color, Color> = when (estado) {
+    EstadoNumero.DISPONIBLE -> scheme.surfaceVariant to scheme.onSurfaceVariant
+    EstadoNumero.RESERVADO -> scheme.tertiaryContainer to scheme.onTertiaryContainer
+    EstadoNumero.ABONADO -> scheme.secondaryContainer to scheme.onSecondaryContainer
+    EstadoNumero.PAGADO -> scheme.primary to scheme.onPrimary
 }
 
 @Composable
 private fun EtiquetaEstado(estado: EstadoNumero) {
-    val (fondo, texto) = coloresEstado(estado)
+    val (fondo, texto) = coloresEstadoSincrono(estado, MaterialTheme.colorScheme)
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))

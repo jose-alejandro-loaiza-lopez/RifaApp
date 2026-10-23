@@ -37,6 +37,7 @@ class TableroViewModel(
             val rifa = tablero?.rifa
             val todosLosNumeros = tablero?.numeros.orEmpty()
             val boletas = tablero?.boletas.orEmpty()
+            val etiquetas = todosLosNumeros.associate { numero -> numero.valor to (rifa?.formatear(numero.valor) ?: numero.valor.toString()) }
 
             val detalle = if (tablero != null && rifa != null && numeroSeleccionado != null) {
                 DetalleNumero(
@@ -149,3 +150,4 @@ fun reservar(nombre: String, telefono: String, montoPagoCentavos: Long? = null) 
         }
     }
 }
+

@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,6 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rifaapp.core.designsystem.theme.RifaAppTheme
 import com.rifaapp.feature.config.ConfigRifaScreen
@@ -77,19 +80,22 @@ private fun MainContainer(container: AppContainer) {
 
     Scaffold(
         bottomBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+            NavigationBar(
+                modifier = Modifier.padding(bottom = 0.dp),
+                tonalElevation = 6.dp,
             ) {
-                TextButton(onClick = { pantalla = Pantalla.TABLERO }) {
-                    Text(if (pantalla == Pantalla.TABLERO) "Tablero*" else "Tablero")
-                }
-                TextButton(onClick = { pantalla = Pantalla.CONFIGURACION }) {
-                    Text(if (pantalla == Pantalla.CONFIGURACION) "Ajustes*" else "Ajustes")
-                }
+                NavigationBarItem(
+                    selected = pantalla == Pantalla.TABLERO,
+                    onClick = { pantalla = Pantalla.TABLERO },
+                    icon = { Text("T", fontWeight = FontWeight.Bold) },
+                    label = { Text("Tablero") },
+                )
+                NavigationBarItem(
+                    selected = pantalla == Pantalla.CONFIGURACION,
+                    onClick = { pantalla = Pantalla.CONFIGURACION },
+                    icon = { Text("A", fontWeight = FontWeight.Bold) },
+                    label = { Text("Ajustes") },
+                )
             }
         },
     ) { padding ->

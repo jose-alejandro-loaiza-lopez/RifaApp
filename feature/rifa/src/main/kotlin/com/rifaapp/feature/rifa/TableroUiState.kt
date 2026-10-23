@@ -13,6 +13,7 @@ data class TableroUiState(
     val rifa: Rifa? = null,
     val numeros: List<Numero> = emptyList(),
     val numerosVisibles: List<Numero> = emptyList(),
+    val etiquetas: Map<Int, String> = emptyMap(),
     val boletas: List<Boleta> = emptyList(),
     val resumen: Resumen? = null,
     val detalle: DetalleNumero? = null,
