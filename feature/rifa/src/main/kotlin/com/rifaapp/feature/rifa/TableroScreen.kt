@@ -220,11 +220,10 @@ fun TableroScreen(
                     onBusquedaChange = onBusquedaChange,
                     onToggleEstado = onToggleEstado,
                     onLimpiarFiltros = onLimpiarFiltros,
+                    onCerrar = { mostrarFiltros = false },
                 )
             },
-            confirmButton = {
-                TextButton(onClick = { mostrarFiltros = false }) { Text("Listo") }
-            },
+            confirmButton = { },
         )
     }
 }
@@ -602,6 +601,7 @@ private fun FiltrosTablero(
     onBusquedaChange: (String) -> Unit,
     onToggleEstado: (EstadoNumero) -> Unit,
     onLimpiarFiltros: () -> Unit,
+    onCerrar: () -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
         OutlinedTextField(
@@ -631,6 +631,13 @@ private fun FiltrosTablero(
                     label = { Text("Limpiar filtros") },
                 )
             }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        TextButton(
+            onClick = onCerrar,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Listo")
         }
     }
 }
