@@ -190,13 +190,12 @@ fun TableroScreen(
     val rifa = state.rifa
     val detalle = state.detalle
     if (rifa != null && detalle != null) {
-        val scrollState = rememberScrollState()
         androidx.compose.ui.window.Dialog(
             onDismissRequest = onCerrarDetalle,
             properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
         ) {
             Box(
-                modifier = Modifier.fillMaxSize().imePadding(),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
                 Surface(
@@ -206,16 +205,15 @@ fun TableroScreen(
                     modifier = Modifier
                         .fillMaxWidth(0.92f)
                         .padding(16.dp)
-                        .heightIn(max = 600.dp)
-                        .verticalScroll(scrollState),
+                        .heightIn(max = 600.dp),
                 ) {
-                    DetalleContenido(
-                        rifa = rifa,
-                        detalle = detalle,
-                        onReservar = onReservar,
-                        onAbonar = onAbonar,
-                        onLiberar = onLiberar,
-                    )
+                    androidx.compose.foundation.lazy.LazyColumn(
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp, vertical = 16.dp)
+                            .imePadding(),
+                    ) {
+                        item { DetalleContenido(rifa = rifa, detalle = detalle, onReservar = onReservar, onAbonar = onAbonar, onLiberar = onLiberar) }
+                    }
                 }
             }
         }
