@@ -6,6 +6,8 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.FlowRow
 
 import androidx.compose.foundation.layout.Arrangement
@@ -360,9 +362,11 @@ private fun DetalleContenido(
     val context = LocalContext.current
     val boleta = detalle.boleta
 
+    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .verticalScroll(scrollState)
             .imePadding()
             .padding(horizontal = 20.dp)
             .padding(bottom = 32.dp),
