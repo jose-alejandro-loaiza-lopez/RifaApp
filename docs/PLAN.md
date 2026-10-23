@@ -213,7 +213,7 @@ source/       RifaLocalDataSource, BoletaLocalDataSource, PagoLocalDataSource
 - [x] `feature:rifa` tablero con grilla 5×20, resumen y detalle
 - [x] Detalle/venta con formulario validado (reservar, abonar, liberar)
 - [x] Filtros del tablero (por estado, número, cliente/celular)
-- [x] `feature:config` ajustes de la rifa (título, precio, fecha, rango)
+- [x] `feature:config` ajustes de la rifa (título, precio, fecha, rango, restaurar)
 - [x] Navegación (BottomBar interna: Tablero/Ajustes)
 - [x] Preview del tablero
 
