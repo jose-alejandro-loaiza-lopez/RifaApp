@@ -1,23 +1,10 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("rifa.android.library")
     alias(libs.plugins.compose)
 }
 
 android {
     namespace = "com.rifaapp.feature.rifa"
-    compileSdk = 37
-    compileSdkMinor = 0
-
-    defaultConfig {
-        minSdk = 24
-    }
-
-    compileOptions {
-        isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
     buildFeatures {
         compose = true
     }

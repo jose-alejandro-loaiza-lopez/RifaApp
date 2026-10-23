@@ -191,7 +191,7 @@ source/       RifaLocalDataSource, BoletaLocalDataSource, PagoLocalDataSource
 - [x] Core library desugaring (`java.time` en API 24+)
 - [x] Módulo `:core:domain` (Kotlin puro, sin Android)
 - [x] Módulos `:core:data`, `:core:database` y `:feature:*`
-- [ ] `build-logic` (convention plugins) para no repetir configuración
+- [x] `build-logic` (convention plugins) para no repetir configuración
 
 ### Fase 1 — Dominio
 - [x] Modelos: `Rifa`, `Numero`, `Boleta`, `Cliente`, `Pago`, `EstadoNumero`

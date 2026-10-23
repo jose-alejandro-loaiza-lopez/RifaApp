@@ -16,6 +16,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "RifaApp"
 
+includeBuild("build-logic")
+
 include(":app")
 include(":core:domain")
 include(":core:data")
