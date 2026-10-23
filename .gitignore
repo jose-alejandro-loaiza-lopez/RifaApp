@@ -23,3 +23,8 @@ Thumbs.db
 # compiled bin
 **/bin
 
+
+# Kotlin DSL / sessions
+.kotlin
+build-logic/.kotlin
+
