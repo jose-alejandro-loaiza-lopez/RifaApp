@@ -19,3 +19,7 @@ captures/
 # SO
 .DS_Store
 Thumbs.db
+
+# compiled bin
+**/bin
+
