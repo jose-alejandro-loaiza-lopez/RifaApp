@@ -202,29 +202,84 @@ fun TableroScreen(
         }
     }
     if (rifa != null && detalle != null) {
-        androidx.compose.material3.AlertDialog(
+        androidx.compose.ui.window.Dialog(
             onDismissRequest = onCerrarDetalle,
-            text = { DetalleContenido(rifa = rifa, detalle = detalle, onReservar = onReservar, onAbonar = onAbonar, onLiberar = onLiberar, onCerrar = onCerrarDetalle) },
-            confirmButton = { },
-        )
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.92f)
+                        .padding(16.dp),
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.surface,
+                        tonalElevation = 8.dp,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        DetalleContenido(
+                            rifa = rifa,
+                            detalle = detalle,
+                            onReservar = onReservar,
+                            onAbonar = onAbonar,
+                            onLiberar = onLiberar,
+                            onCerrar = {},
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        TextButton(onClick = onCerrarDetalle) { Text("Cerrar") }
+                    }
+                }
+            }
+        }
     }
 
     if (mostrarFiltros) {
-        androidx.compose.material3.AlertDialog(
+        androidx.compose.ui.window.Dialog(
             onDismissRequest = { mostrarFiltros = false },
-            title = { Text("Filtrar números") },
-            text = {
-                FiltrosTablero(
-                    busqueda = state.busqueda,
-                    estadosFiltrados = state.estadosFiltrados,
-                    onBusquedaChange = onBusquedaChange,
-                    onToggleEstado = onToggleEstado,
-                    onLimpiarFiltros = onLimpiarFiltros,
-                    onCerrar = { mostrarFiltros = false },
-                )
-            },
-            confirmButton = { },
-        )
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.92f)
+                        .padding(16.dp),
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.surface,
+                        tonalElevation = 8.dp,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        FiltrosTablero(
+                            busqueda = state.busqueda,
+                            estadosFiltrados = state.estadosFiltrados,
+                            onBusquedaChange = onBusquedaChange,
+                            onToggleEstado = onToggleEstado,
+                            onLimpiarFiltros = onLimpiarFiltros,
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        TextButton(onClick = { mostrarFiltros = false }) { Text("Listo") }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -378,11 +433,9 @@ private fun DetalleContenido(
     val context = LocalContext.current
     val boleta = detalle.boleta
 
-    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .verticalScroll(scrollState)
             .padding(horizontal = 20.dp)
             .padding(bottom = 0.dp),
     ) {
@@ -479,11 +532,6 @@ private fun DetalleContenido(
                 Text("Liberar número")
             }
         }
-    }
-
-    Spacer(modifier = Modifier.height(8.dp))
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        TextButton(onClick = onCerrar) { Text("Cerrar") }
     }
 
     if (mostrarDialogoAbono) {
@@ -638,13 +686,6 @@ private fun FiltrosTablero(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-        ) {
-            TextButton(onClick = onCerrar) { Text("Listo") }
-        }
     }
 }
 
@@ -692,3 +733,4 @@ private fun TableroPreview() {
         )
     }
 }
+
