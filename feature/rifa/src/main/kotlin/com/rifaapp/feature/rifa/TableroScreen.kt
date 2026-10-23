@@ -187,7 +187,7 @@ fun TableroScreen(
     if (rifa != null && detalle != null) {
         androidx.compose.ui.window.Dialog(
             onDismissRequest = onCerrarDetalle,
-            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+            properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = true, usePlatformDefaultWidth = false),
         ) {
             BoxWithConstraints(
                 modifier = Modifier.fillMaxSize().imePadding(),
