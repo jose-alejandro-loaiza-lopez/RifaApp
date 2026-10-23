@@ -52,7 +52,9 @@ dependencies {
 
     implementation(project(":core:domain"))
     implementation(project(":core:data"))
+    implementation(project(":core:designsystem"))
     implementation(project(":feature:rifa"))
+    implementation(project(":feature:config"))
 
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

@@ -28,6 +28,9 @@ class InMemoryBoletaRepository(
     override suspend fun obtenerPorNumero(rifaId: Long, numero: Int): Boleta? =
         boletas.value.firstOrNull { it.rifaId == rifaId && it.numero == numero }
 
+    override suspend fun obtenerPorRifa(rifaId: Long): List<Boleta> =
+        boletas.value.filter { it.rifaId == rifaId }
+
     override suspend fun guardar(boleta: Boleta): Resultado<Boleta> {
         val nueva = boleta.copy(id = siguienteBoletaId++)
         boletas.value = boletas.value + nueva

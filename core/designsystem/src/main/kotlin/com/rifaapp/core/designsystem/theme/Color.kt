@@ -1,4 +1,4 @@
-package com.rifaapp.ui.theme
+package com.rifaapp.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 

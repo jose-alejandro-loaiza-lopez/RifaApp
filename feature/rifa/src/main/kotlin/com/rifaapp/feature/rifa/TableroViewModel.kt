@@ -2,6 +2,8 @@ package com.rifaapp.feature.rifa
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rifaapp.core.designsystem.formatearPrecio
+import com.rifaapp.core.designsystem.textoVisible
 import com.rifaapp.core.domain.common.ErrorDominio
 import com.rifaapp.core.domain.common.Resultado
 import com.rifaapp.core.domain.model.EstadoNumero
@@ -115,16 +117,4 @@ class TableroViewModel(
     }
 }
 
-fun ErrorDominio.textoVisible(): String = when (this) {
-    ErrorDominio.NumeroNoDisponible -> "Ese número ya está ocupado."
-    ErrorDominio.NumeroFueraDeRango -> "El número está fuera del rango de la rifa."
-    ErrorDominio.NombreVacio -> "Escribe el nombre del cliente."
-    ErrorDominio.TituloVacio -> "La rifa necesita un título."
-    ErrorDominio.TelefonoInvalido -> "Teléfono inválido. Usa el indicativo, ej. +57 300 123 4567."
-    ErrorDominio.MontoInvalido -> "El monto debe ser mayor que cero."
-    ErrorDominio.PrecioInvalido -> "El precio de la boleta no es válido."
-    ErrorDominio.RangoInvalido -> "El rango de números no es válido."
-    ErrorDominio.RifaNoEncontrada -> "No hay una rifa configurada."
-    ErrorDominio.BoletaNoEncontrada -> "No se encontró la boleta."
-    is ErrorDominio.Desconocido -> mensaje
-}
+

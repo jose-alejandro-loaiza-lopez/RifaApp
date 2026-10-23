@@ -53,6 +53,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rifaapp.core.domain.model.Boleta
+import com.rifaapp.core.designsystem.formatearPrecio
+import com.rifaapp.core.designsystem.parsearPesosACentavos
 import com.rifaapp.core.domain.model.EstadoNumero
 import com.rifaapp.core.domain.model.Numero
 import com.rifaapp.core.domain.model.Resumen
@@ -71,6 +73,7 @@ fun TableroScreen(
     onAbonar: (Long) -> Unit,
     onLiberar: () -> Unit,
     onConsumirMensaje: () -> Unit,
+    onAbrirConfig: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -99,6 +102,9 @@ fun TableroScreen(
                             )
                         }
                     }
+                },
+                actions = {
+                    TextButton(onClick = onAbrirConfig) { Text("Ajustes") }
                 },
             )
         },
@@ -542,6 +548,7 @@ private fun TableroPreview() {
             onAbonar = {},
             onLiberar = {},
             onConsumirMensaje = {},
+            onAbrirConfig = {},
         )
     }
 }

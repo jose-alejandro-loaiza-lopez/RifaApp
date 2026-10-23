@@ -10,10 +10,12 @@ import com.rifaapp.core.domain.model.Boleta
 import com.rifaapp.core.domain.model.Cliente
 import com.rifaapp.core.domain.model.Pago
 import com.rifaapp.core.domain.model.Rifa
+import com.rifaapp.core.domain.usecase.GuardarConfiguracionRifa
 import com.rifaapp.core.domain.usecase.LiberarNumero
 import com.rifaapp.core.domain.usecase.ObservarTablero
 import com.rifaapp.core.domain.usecase.RegistrarPago
 import com.rifaapp.core.domain.usecase.ReservarNumero
+import com.rifaapp.feature.config.ConfigRifaViewModel
 import com.rifaapp.feature.rifa.TableroViewModel
 import java.time.Instant
 import java.time.LocalDate
@@ -78,6 +80,7 @@ class AppContainer {
     private val reservarNumero = ReservarNumero(boletas)
     private val registrarPago = RegistrarPago(boletas)
     private val liberarNumero = LiberarNumero(boletas)
+    private val guardarConfiguracion = GuardarConfiguracionRifa(rifas, boletas)
 
     val tableroViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
         initializer {
@@ -87,6 +90,12 @@ class AppContainer {
                 registrarPago = registrarPago,
                 liberarNumero = liberarNumero,
             )
+        }
+    }
+
+    val configViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
+        initializer {
+            ConfigRifaViewModel(observarTablero, guardarConfiguracion)
         }
     }
 }

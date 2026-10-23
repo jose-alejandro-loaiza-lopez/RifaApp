@@ -1,4 +1,4 @@
-package com.rifaapp.feature.rifa
+package com.rifaapp.core.designsystem
 
 import java.text.NumberFormat
 import java.util.Locale
@@ -14,3 +14,6 @@ fun parsearPesosACentavos(texto: String): Long? {
     if (digitos.isEmpty()) return null
     return digitos.toLongOrNull()?.times(100)
 }
+
+/** Precio en centavos -> texto editable en pesos (sin separadores). */
+fun centavosAPesosTexto(centavos: Long): String = (centavos / 100).toString()

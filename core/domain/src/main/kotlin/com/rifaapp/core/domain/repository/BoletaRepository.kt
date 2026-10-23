@@ -15,6 +15,9 @@ interface BoletaRepository {
 
     suspend fun obtenerPorNumero(rifaId: Long, numero: Int): Boleta?
 
+    /** Boletas activas de la rifa, sin importar su estado. */
+    suspend fun obtenerPorRifa(rifaId: Long): List<Boleta>
+
     suspend fun guardar(boleta: Boleta): Resultado<Boleta>
 
     suspend fun registrarPago(

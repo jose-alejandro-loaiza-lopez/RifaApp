@@ -25,6 +25,7 @@ android {
 
 dependencies {
     implementation(project(":core:domain"))
+    implementation(project(":core:designsystem"))
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     val composeBom = platform(libs.androidx.compose.bom)

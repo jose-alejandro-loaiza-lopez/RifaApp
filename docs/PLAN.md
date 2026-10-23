@@ -210,11 +210,11 @@ source/       RifaLocalDataSource, BoletaLocalDataSource, PagoLocalDataSource
 - [ ] Seed inicial: rifa de ejemplo con 100 números en `DISPONIBLE`
 
 ### Fase 3 — UI
-- [ ] `designsystem`: tema, tokens, `NumeroChip`, `EstadoBadge`, `ContadorResumen`
+- [x] `designsystem`: tema, `NumeroChip`, `EstadoBadge`, `ContadorResumen` parcial (tema + formatos + mensajes de error)
 - [x] `feature:rifa` tablero con grilla 5×20, resumen y detalle
 - [x] Detalle/venta con formulario validado (reservar, abonar, liberar)
 - [ ] Filtros del tablero (por estado, por número/cliente)
-- [ ] `feature:config` ajustes de la rifa
+- [x] `feature:config` ajustes de la rifa (título, precio, fecha, rango)
 - [ ] Navegación (type-safe routes)
 - [x] Preview del tablero
 

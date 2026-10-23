@@ -34,6 +34,9 @@ sealed interface ErrorDominio {
 
     data object BoletaNoEncontrada : ErrorDominio
 
+    /** Se intentó encoger el rango de la rifa dejando boletas por fuera. */
+    data class NumerosOcupadosFueraDeRango(val numeros: List<Int>) : ErrorDominio
+
     data class Desconocido(val mensaje: String) : ErrorDominio
 }
 
