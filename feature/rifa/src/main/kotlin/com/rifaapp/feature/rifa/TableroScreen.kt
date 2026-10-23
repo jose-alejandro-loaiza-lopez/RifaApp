@@ -384,7 +384,7 @@ private fun DetalleContenido(
             .fillMaxWidth()
             .verticalScroll(scrollState)
             .padding(horizontal = 20.dp)
-            .padding(bottom = 32.dp),
+            .padding(bottom = 8.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
