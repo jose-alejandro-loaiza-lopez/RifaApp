@@ -12,7 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -36,6 +35,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.rifaapp.core.designsystem.parsearPesosACentavos
@@ -71,7 +72,6 @@ fun ConfigRifaScreen(
     LaunchedEffect(state.guardado) {
         if (state.guardado) {
             onConsumirGuardado()
-            onVolver()
         }
     }
 
@@ -84,9 +84,36 @@ fun ConfigRifaScreen(
     var mostrarFecha by remember { mutableStateOf(false) }
     var confirmarRestaurar by remember { mutableStateOf(false) }
 
+    var mostrarTitulo by remember { mutableStateOf(false) }
+    var tituloTmp by remember { mutableStateOf("") }
+    var mostrarDescripcion by remember { mutableStateOf(false) }
+    var descripcionTmp by remember { mutableStateOf("") }
+    var mostrarPrecio by remember { mutableStateOf(false) }
+    var precioTmp by remember { mutableStateOf("") }
+    var mostrarDesde by remember { mutableStateOf(false) }
+    var desdeTmp by remember { mutableStateOf("") }
+    var mostrarHasta by remember { mutableStateOf(false) }
+    var hastaTmp by remember { mutableStateOf("") }
+    var mostrarColumnas by remember { mutableStateOf(false) }
+    var columnasTmp by remember { mutableStateOf("") }
+
+    val formularioState = androidx.compose.runtime.rememberUpdatedState(formulario)
+    androidx.compose.runtime.LaunchedEffect(formulario) {
+        if (!formulario.puedeGuardar) return@LaunchedEffect
+        kotlinx.coroutines.delay(600)
+        onGuardar(formulario)
+    }
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        onDispose {
+            val actual = formularioState.value
+            if (actual.puedeGuardar) onGuardar(actual)
+        }
+    }
+
     if (confirmarRestaurar) {
         AlertDialog(
             onDismissRequest = { confirmarRestaurar = false },
+            properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = true),
             title = { Text("Restaurar por defecto") },
             text = { Text("Se eliminarán las boletas actuales y se pondrá la rifa de ejemplo otra vez.") },
             confirmButton = {
@@ -107,6 +134,7 @@ fun ConfigRifaScreen(
             )
         DatePickerDialog(
             onDismissRequest = { mostrarFecha = false },
+            properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = true),
             confirmButton = {
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     TextButton(onClick = {
@@ -135,6 +163,61 @@ fun ConfigRifaScreen(
         }
     }
 
+    if (mostrarTitulo) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { mostrarTitulo = false },
+            title = { Text("Premio (título)") },
+            text = { OutlinedTextField(value = tituloTmp, onValueChange = { tituloTmp = it }, singleLine = true, modifier = Modifier.fillMaxWidth()) },
+            confirmButton = { TextButton(onClick = { formulario = formulario.copy(titulo = tituloTmp.trim()); mostrarTitulo = false }) { Text("Aceptar") } },
+            dismissButton = { TextButton(onClick = { mostrarTitulo = false }) { Text("Cancelar") } },
+        )
+    }
+    if (mostrarDescripcion) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { mostrarDescripcion = false },
+            title = { Text("Descripción") },
+            text = { OutlinedTextField(value = descripcionTmp, onValueChange = { descripcionTmp = it }, modifier = Modifier.fillMaxWidth()) },
+            confirmButton = { TextButton(onClick = { formulario = formulario.copy(descripcion = descripcionTmp.trim()); mostrarDescripcion = false }) { Text("Aceptar") } },
+            dismissButton = { TextButton(onClick = { mostrarDescripcion = false }) { Text("Cancelar") } },
+        )
+    }
+    if (mostrarPrecio) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { mostrarPrecio = false },
+            title = { Text("Precio por número (pesos)") },
+            text = { OutlinedTextField(value = precioTmp, onValueChange = { precioTmp = it }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true, modifier = Modifier.fillMaxWidth()) },
+            confirmButton = { TextButton(onClick = { formulario = formulario.copy(precioTexto = precioTmp.trim()); mostrarPrecio = false }) { Text("Aceptar") } },
+            dismissButton = { TextButton(onClick = { mostrarPrecio = false }) { Text("Cancelar") } },
+        )
+    }
+    if (mostrarDesde) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { mostrarDesde = false },
+            title = { Text("Desde") },
+            text = { OutlinedTextField(value = desdeTmp, onValueChange = { desdeTmp = it }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true, modifier = Modifier.fillMaxWidth()) },
+            confirmButton = { TextButton(onClick = { formulario = formulario.copy(numeroInicioTexto = desdeTmp.trim()); mostrarDesde = false }) { Text("Aceptar") } },
+            dismissButton = { TextButton(onClick = { mostrarDesde = false }) { Text("Cancelar") } },
+        )
+    }
+    if (mostrarHasta) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { mostrarHasta = false },
+            title = { Text("Hasta") },
+            text = { OutlinedTextField(value = hastaTmp, onValueChange = { hastaTmp = it }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true, modifier = Modifier.fillMaxWidth()) },
+            confirmButton = { TextButton(onClick = { formulario = formulario.copy(numeroFinTexto = hastaTmp.trim()); mostrarHasta = false }) { Text("Aceptar") } },
+            dismissButton = { TextButton(onClick = { mostrarHasta = false }) { Text("Cancelar") } },
+        )
+    }
+    if (mostrarColumnas) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { mostrarColumnas = false },
+            title = { Text("Columnas") },
+            text = { OutlinedTextField(value = columnasTmp, onValueChange = { columnasTmp = it }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true, modifier = Modifier.fillMaxWidth()) },
+            confirmButton = { TextButton(onClick = { formulario = formulario.copy(columnasTexto = columnasTmp.trim()); mostrarColumnas = false }) { Text("Aceptar") } },
+            dismissButton = { TextButton(onClick = { mostrarColumnas = false }) { Text("Cancelar") } },
+        )
+    }
+
 Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -157,69 +240,61 @@ Scaffold(
                 return@Column
             }
 
-            OutlinedTextField(
-                value = formulario.titulo,
-                onValueChange = { formulario = formulario.copy(titulo = it) },
-                label = { Text("Premio (título)") },
-                placeholder = { Text("Moto pulsar 200, combo navideño…") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+            CampoAjuste(
+                etiqueta = "Premio (título)",
+                texto = if (formulario.titulo.isBlank()) "Moto pulsar 200, combo navideño…" else formulario.titulo,
+                onClick = {
+                    tituloTmp = formulario.titulo
+                    mostrarTitulo = true
+                },
             )
             Spacer(Modifier.height(12.dp))
 
-            OutlinedTextField(
-                value = formulario.descripcion,
-                onValueChange = { formulario = formulario.copy(descripcion = it) },
-                label = { Text("Descripción (opcional)") },
-                modifier = Modifier.fillMaxWidth(),
+            CampoAjuste(
+                etiqueta = "Descripción (opcional)",
+                texto = if (formulario.descripcion.isBlank()) "Descripción (opcional)" else formulario.descripcion,
+                onClick = {
+                    descripcionTmp = formulario.descripcion
+                    mostrarDescripcion = true
+                },
             )
             Spacer(Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = formulario.precioTexto,
-                onValueChange = { formulario = formulario.copy(precioTexto = it) },
-                label = { Text("Precio por número (pesos)") },
-                placeholder = { Text("10000") },
-                prefix = { Text("$") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = "Los estados y saldos se recalculan automáticamente al guardar.",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            CampoAjuste(
+                etiqueta = "Precio por número (pesos)",
+                texto = if (formulario.precioTexto.isBlank()) "$10000" else "$${formulario.precioTexto}",
+                onClick = {
+                    precioTmp = formulario.precioTexto
+                    mostrarPrecio = true
+                },
             )
             Spacer(Modifier.height(16.dp))
 
-            OutlinedButton(
+            CampoAjuste(
+                etiqueta = "Fecha del sorteo",
+                texto = formulario.fechaSorteo?.let { "Sorteo: ${it.format(FORMATO_FECHA)}" } ?: "Elegir fecha del sorteo",
                 onClick = { mostrarFecha = true },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    formulario.fechaSorteo?.let { "Sorteo: ${it.format(FORMATO_FECHA)}" }
-                        ?: "Elegir fecha del sorteo",
-                )
-            }
+            )
             Spacer(Modifier.height(16.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = formulario.numeroInicioTexto,
-                    onValueChange = { formulario = formulario.copy(numeroInicioTexto = it) },
-                    label = { Text("Desde") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
+                CampoAjuste(
                     modifier = Modifier.weight(1f),
+                    etiqueta = "Desde",
+                    texto = if (formulario.numeroInicioTexto.isBlank()) "Desde" else formulario.numeroInicioTexto,
+                    onClick = {
+                        desdeTmp = formulario.numeroInicioTexto
+                        mostrarDesde = true
+                    },
                 )
-                OutlinedTextField(
-                    value = formulario.numeroFinTexto,
-                    onValueChange = { formulario = formulario.copy(numeroFinTexto = it) },
-                    label = { Text("Hasta") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
+                CampoAjuste(
                     modifier = Modifier.weight(1f),
+                    etiqueta = "Hasta",
+                    texto = if (formulario.numeroFinTexto.isBlank()) "Hasta" else formulario.numeroFinTexto,
+                    onClick = {
+                        hastaTmp = formulario.numeroFinTexto
+                        mostrarHasta = true
+                    },
                 )
             }
             Spacer(Modifier.height(4.dp))
@@ -235,19 +310,23 @@ Scaffold(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
+            Spacer(Modifier.height(12.dp))
+
+            CampoAjuste(
+                etiqueta = "Columnas de la cuadrícula",
+                texto = if (formulario.columnasTexto.isBlank()) "5" else formulario.columnasTexto,
+                onClick = {
+                    columnasTmp = formulario.columnasTexto
+                    mostrarColumnas = true
+                },
+            )
+            Text(
+                text = "Define cuántos números se muestran por fila (1 a 12).",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
             Spacer(Modifier.height(24.dp))
-
-            Button(
-                onClick = { onGuardar(formulario) },
-                enabled = formulario.puedeGuardar && !state.guardando,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(if (state.guardando) "Guardando…" else "Guardar cambios")
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            Spacer(Modifier.height(8.dp))
 
             OutlinedButton(
                 onClick = { confirmarRestaurar = true },
@@ -255,15 +334,6 @@ Scaffold(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Restaurar por defecto")
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            TextButton(
-                onClick = onVolver,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("Cancelar")
             }
 
             Spacer(Modifier.height(16.dp))

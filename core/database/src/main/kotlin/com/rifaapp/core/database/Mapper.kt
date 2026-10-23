@@ -18,6 +18,7 @@ internal fun RifaEntity.toDomain(): Rifa = Rifa(
     numeroInicio = numeroInicio,
     numeroFin = numeroFin,
     cantidadDigitos = cantidadDigitos,
+    columnas = columnas,
 )
 
 internal fun Rifa.toEntity(preferredId: Long? = null): RifaEntity {
@@ -35,6 +36,7 @@ internal fun Rifa.toEntity(preferredId: Long? = null): RifaEntity {
         numeroInicio = numeroInicio,
         numeroFin = numeroFin,
         cantidadDigitos = cantidadDigitos,
+        columnas = columnas,
     )
 }
 

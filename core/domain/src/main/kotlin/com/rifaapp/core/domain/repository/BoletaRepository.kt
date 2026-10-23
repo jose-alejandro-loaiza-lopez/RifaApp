@@ -27,6 +27,9 @@ interface BoletaRepository {
         nota: String? = null,
     ): Resultado<Boleta>
 
+    /** Reemplaza los pagos actuales por un único pago con el monto indicado (o ninguno si es 0). */
+    suspend fun actualizarMontoPagado(boletaId: Long, montoCentavos: Long): Resultado<Boleta>
+
     /** Elimina la boleta activa; el número vuelve a estar DISPONIBLE. */
     suspend fun liberar(boletaId: Long): Resultado<Unit>
 }

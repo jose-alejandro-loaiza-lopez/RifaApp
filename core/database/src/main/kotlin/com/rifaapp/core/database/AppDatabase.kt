@@ -12,7 +12,7 @@ import com.rifaapp.core.database.entity.RifaEntity
 
 @Database(
     entities = [RifaEntity::class, BoletaEntity::class, PagoEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)

@@ -15,6 +15,7 @@ data class Rifa(
     val numeroInicio: Int = 0,
     val numeroFin: Int = 99,
     val cantidadDigitos: Int = 2,
+    val columnas: Int = 5,
 ) {
     val cantidadNumeros: Int get() = numeroFin - numeroInicio + 1
 

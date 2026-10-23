@@ -117,6 +117,7 @@ private fun MainContainer(container: AppContainer) {
                     onReservar = viewModel::reservar,
                     onAbonar = viewModel::abonar,
                     onLiberar = viewModel::liberar,
+                    onEditar = viewModel::editar,
                     onConsumirMensaje = viewModel::consumirMensaje,
                     onAbrirConfig = {},
                     onBusquedaChange = viewModel::onBusquedaChange,

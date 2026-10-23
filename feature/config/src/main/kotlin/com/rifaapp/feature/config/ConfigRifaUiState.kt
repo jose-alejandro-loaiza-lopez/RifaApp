@@ -18,6 +18,7 @@ data class FormularioRifa(
     val fechaSorteo: java.time.LocalDate? = null,
     val numeroInicioTexto: String = "",
     val numeroFinTexto: String = "",
+    val columnasTexto: String = "5",
 ) {
     val precioCentavos: Long?
         get() = parsearPesosACentavos(precioTexto)
@@ -36,6 +37,7 @@ data class FormularioRifa(
             fechaSorteo = rifa.fechaSorteo,
             numeroInicioTexto = rifa.numeroInicio.toString(),
             numeroFinTexto = rifa.numeroFin.toString(),
+            columnasTexto = rifa.columnas.toString(),
         )
     }
 }

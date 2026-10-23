@@ -44,6 +44,26 @@ class RoomBoletaRepository(
         Resultado.Exito(fresh)
     }
 
+    override suspend fun actualizarMontoPagado(boletaId: Long, montoCentavos: Long): Resultado<Boleta> = withContext(Dispatchers.IO) {
+        if (dao.obtenerPorId(boletaId) == null) {
+            return@withContext Resultado.Fallo(ErrorDominio.BoletaNoEncontrada)
+        }
+        dao.eliminarPagos(boletaId)
+        if (montoCentavos > 0L) {
+            dao.insertarPago(
+                PagoEntity(
+                    boletaId = boletaId,
+                    monto = montoCentavos,
+                    fecha = Instant.now(),
+                    nota = null,
+                )
+            )
+        }
+        val fresh = dao.obtenerPorId(boletaId)?.toDomain()
+            ?: return@withContext Resultado.Fallo(ErrorDominio.BoletaNoEncontrada)
+        Resultado.Exito(fresh)
+    }
+
     override suspend fun registrarPago(
         boletaId: Long,
         monto: Long,

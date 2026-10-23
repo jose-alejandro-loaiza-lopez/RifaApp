@@ -69,6 +69,8 @@ class ConfigRifaViewModel(
             fin.toString().length,
         ).coerceAtLeast(1)
 
+        val columnas = formulario.columnasTexto.toIntOrNull()?.coerceIn(1, 12) ?: rifaActual.columnas
+
         val nueva = rifaActual.copy(
             titulo = formulario.titulo.trim(),
             descripcion = formulario.descripcion.trim(),
@@ -77,6 +79,7 @@ class ConfigRifaViewModel(
             numeroInicio = inicio,
             numeroFin = fin,
             cantidadDigitos = digitos,
+            columnas = columnas,
         )
 
         viewModelScope.launch {
@@ -84,7 +87,6 @@ class ConfigRifaViewModel(
             when (val resultado = guardarConfiguracion(nueva)) {
                 is Resultado.Exito -> {
                     guardado.value = true
-                    mensaje.value = "Configuración guardada"
                 }
 
                 is Resultado.Fallo -> mensaje.value = resultado.error.textoVisible()
@@ -110,6 +112,7 @@ class ConfigRifaViewModel(
                 numeroInicio = 0,
                 numeroFin = 99,
                 cantidadDigitos = 2,
+                columnas = 5,
             )
             when (val resultado = guardarConfiguracion(defaultRifa)) {
                 is Resultado.Exito -> {
@@ -140,5 +143,6 @@ class ConfigRifaViewModel(
         numeroInicio = 0,
         numeroFin = 99,
         cantidadDigitos = 2,
+        columnas = 5,
     )
 }

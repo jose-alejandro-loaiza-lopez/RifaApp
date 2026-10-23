@@ -58,6 +58,16 @@ class InMemoryBoletaRepository(
         return Resultado.Exito(actualizada)
     }
 
+    override suspend fun actualizarMontoPagado(boletaId: Long, montoCentavos: Long): Resultado<Boleta> {
+        val actual = boletas.value.firstOrNull { it.id == boletaId }
+            ?: return Resultado.Fallo(ErrorDominio.BoletaNoEncontrada)
+        val pagos = if (montoCentavos > 0L) listOf(
+            Pago(id = siguientePagoId++, boletaId = boletaId, monto = montoCentavos, fecha = Instant.now(), nota = null)
+        ) else emptyList()
+        val actualizada = actual.copy(pagos = pagos)
+        boletas.value = boletas.value.map { if (it.id == boletaId) actualizada else it }
+        return Resultado.Exito(actualizada)
+    }
     override suspend fun liberar(boletaId: Long): Resultado<Unit> {
         boletas.value = boletas.value.filterNot { it.id == boletaId }
         return Resultado.Exito(Unit)

@@ -20,11 +20,15 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+import com.rifaapp.core.domain.repository.BoletaRepository
+import com.rifaapp.core.domain.model.Cliente
+import com.rifaapp.core.domain.model.Boleta
 class TableroViewModel(
     private val observarTablero: ObservarTablero,
     private val reservarNumero: ReservarNumero,
     private val registrarPago: RegistrarPago,
     private val liberarNumero: LiberarNumero,
+    private val boletas: BoletaRepository,
 ) : ViewModel() {
 
     private val seleccionado = MutableStateFlow<Int?>(null)
@@ -94,6 +98,23 @@ class TableroViewModel(
     fun onBusquedaChange(texto: String) { busqueda.value = texto }
     fun toggleEstado(est: EstadoNumero) { estadosFiltrados.value = estadosFiltrados.value.toMutableSet().apply { if (this.contains(est)) remove(est) else add(est) } }
     fun limpiarFiltros() { busqueda.value = ""; estadosFiltrados.value = emptySet() }
+
+    fun editar(nombre: String, telefono: String, montoPagoCentavos: Long?) {
+        val boleta = state.value.detalle?.boleta ?: return
+        viewModelScope.launch {
+            val actualizada = boleta.copy(cliente = Cliente(nombre.trim(), telefono.trim()))
+            when (val resultado = boletas.guardar(actualizada)) {
+                is Resultado.Exito -> {
+                    val monto = montoPagoCentavos
+                    if (monto != null && monto != boleta.montoPagado) {
+                        boletas.actualizarMontoPagado(boleta.id, monto)
+                    }
+                    mensaje.value = "Información actualizada"
+                }
+                is Resultado.Fallo -> mensaje.value = resultado.error.textoVisible()
+            }
+        }
+    }
 
 fun reservar(nombre: String, telefono: String, montoPagoCentavos: Long? = null) {
         val rifa = state.value.rifa ?: return

@@ -37,4 +37,7 @@ interface BoletaDao {
 
     @Insert
     suspend fun insertarPago(entity: PagoEntity): Long
+
+    @Query("DELETE FROM pago WHERE boletaId = :boletaId")
+    suspend fun eliminarPagos(boletaId: Long)
 }

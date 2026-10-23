@@ -51,6 +51,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -88,6 +89,7 @@ fun TableroScreen(
     onReservar: (String, String, Long?) -> Unit,
     onAbonar: (Long) -> Unit,
     onLiberar: () -> Unit,
+    onEditar: (String, String, Long?) -> Unit = { _, _, _ -> },
     onConsumirMensaje: () -> Unit,
     onAbrirConfig: () -> Unit,
     onBusquedaChange: (String) -> Unit,
@@ -159,7 +161,7 @@ fun TableroScreen(
                 state.resumen?.let { ResumenRifa(it) }
 
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(5),
+                    columns = GridCells.Fixed(rifa.columnas.coerceIn(1, 12)),
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -190,7 +192,13 @@ fun TableroScreen(
             properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = true, usePlatformDefaultWidth = false),
         ) {
             BoxWithConstraints(
-                modifier = Modifier.fillMaxSize().imePadding(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) { onCerrarDetalle() },
                 contentAlignment = Alignment.Center,
             ) {
                 Surface(
@@ -199,7 +207,11 @@ fun TableroScreen(
                     tonalElevation = 8.dp,
                     modifier = Modifier
                         .fillMaxWidth(0.92f)
-                        .heightIn(max = maxHeight * 0.9f),
+                        .heightIn(max = maxHeight * 0.9f)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) { },
                 ) {
                     Column(
                         modifier = Modifier
@@ -212,14 +224,9 @@ fun TableroScreen(
                             onReservar = onReservar,
                             onAbonar = onAbonar,
                             onLiberar = onLiberar,
-                            onCerrar = {},
+                            onEditar = onEditar,
+                            onCerrar = onCerrarDetalle,
                         )
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(end = 12.dp),
-                            horizontalArrangement = Arrangement.End,
-                        ) {
-                            TextButton(onClick = onCerrarDetalle) { Text("Cerrar") }
-                        }
                     }
                 }
             }
@@ -227,12 +234,20 @@ fun TableroScreen(
     }
 
     if (mostrarFiltros) {
+        var busquedaTmp by remember { mutableStateOf(state.busqueda) }
+        var estadosTmp by remember { mutableStateOf(state.estadosFiltrados) }
         androidx.compose.ui.window.Dialog(
             onDismissRequest = { mostrarFiltros = false },
             properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = true, usePlatformDefaultWidth = false),
         ) {
             BoxWithConstraints(
-                modifier = Modifier.fillMaxSize().imePadding(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) { mostrarFiltros = false },
                 contentAlignment = Alignment.Center,
             ) {
                 Surface(
@@ -241,7 +256,11 @@ fun TableroScreen(
                     tonalElevation = 8.dp,
                     modifier = Modifier
                         .fillMaxWidth(0.92f)
-                        .heightIn(max = maxHeight * 0.9f),
+                        .heightIn(max = maxHeight * 0.9f)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) { },
                 ) {
                     Column(
                         modifier = Modifier
@@ -257,17 +276,29 @@ fun TableroScreen(
                                 .padding(start = 12.dp, end = 12.dp, bottom = 8.dp),
                         )
                         FiltrosTablero(
-                            busqueda = state.busqueda,
-                            estadosFiltrados = state.estadosFiltrados,
-                            onBusquedaChange = onBusquedaChange,
-                            onToggleEstado = onToggleEstado,
-                            onLimpiarFiltros = onLimpiarFiltros,
+                            busqueda = busquedaTmp,
+                            estadosFiltrados = estadosTmp,
+                            onBusquedaChange = { busquedaTmp = it },
+                            onToggleEstado = { est ->
+                                estadosTmp = estadosTmp.toMutableSet().apply {
+                                    if (contains(est)) remove(est) else add(est)
+                                }
+                            },
+                            onLimpiarFiltros = {
+                                busquedaTmp = ""
+                                estadosTmp = emptySet()
+                            },
                         )
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(end = 12.dp),
                             horizontalArrangement = Arrangement.End,
                         ) {
-                            TextButton(onClick = { mostrarFiltros = false }) { Text("Listo") }
+                            TextButton(onClick = {
+                                onBusquedaChange(busquedaTmp)
+                                (state.estadosFiltrados - estadosTmp).forEach { onToggleEstado(it) }
+                                (estadosTmp - state.estadosFiltrados).forEach { onToggleEstado(it) }
+                                mostrarFiltros = false
+                            }) { Text("Listo") }
                         }
                     }
                 }
@@ -415,6 +446,7 @@ private fun DetalleContenido(
     onReservar: (String, String, Long?) -> Unit,
     onAbonar: (Long) -> Unit,
     onLiberar: () -> Unit,
+    onEditar: (String, String, Long?) -> Unit = { _, _, _ -> },
     onCerrar: () -> Unit = {},
 ) {
     var nombre by remember { mutableStateOf("") }
@@ -422,6 +454,10 @@ private fun DetalleContenido(
     var montoPago by remember { mutableStateOf("") }
     var mostrarDialogoAbono by remember { mutableStateOf(false) }
     var mostrarDialogoLiberar by remember { mutableStateOf(false) }
+    var mostrarDialogoEditar by remember { mutableStateOf(false) }
+    var nombreEditar by remember { mutableStateOf("") }
+    var telefonoEditar by remember { mutableStateOf("") }
+    var montoEditar by remember { mutableStateOf("") }
 
     val context = LocalContext.current
     val boleta = detalle.boleta
@@ -478,14 +514,6 @@ private fun DetalleContenido(
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(modifier = Modifier.height(20.dp))
-
-            Button(
-                onClick = { onReservar(nombre, telefono, parsearPesosACentavos(montoPago)) },
-                enabled = nombre.isNotBlank() && telefono.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("Reservar número")
-            }
         } else {
             InfoFila("Cliente", boleta.cliente.nombre)
             InfoFila("Celular", boleta.cliente.telefonoE164)
@@ -496,14 +524,6 @@ private fun DetalleContenido(
             Spacer(modifier = Modifier.height(20.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (detalle.saldo > 0L) {
-                    Button(
-                        onClick = { mostrarDialogoAbono = true },
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Text("Registrar abono")
-                    }
-                }
                 OutlinedButton(
                     onClick = {
                         abrirWhatsApp(
@@ -525,6 +545,31 @@ private fun DetalleContenido(
                 Text("Liberar número")
             }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            TextButton(onClick = onCerrar) { Text("Cerrar") }
+            if (boleta == null) {
+                Button(
+                    onClick = { onReservar(nombre, telefono, parsearPesosACentavos(montoPago)) },
+                    enabled = nombre.isNotBlank() && telefono.isNotBlank(),
+                ) {
+                    Text("Reservar")
+                }
+            } else {
+                Button(onClick = {
+                    nombreEditar = boleta.cliente.nombre
+                    telefonoEditar = boleta.cliente.telefonoE164
+                    montoEditar = (boleta.montoPagado / 100L).toString()
+                    mostrarDialogoEditar = true
+                }) {
+                    Text("Editar")
+                }
+            }
+        }
     }
 
     if (mostrarDialogoAbono) {
@@ -541,6 +586,7 @@ private fun DetalleContenido(
     if (mostrarDialogoLiberar) {
         AlertDialog(
             onDismissRequest = { mostrarDialogoLiberar = false },
+            properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = true),
             title = { Text("¿Liberar el número?") },
             text = { Text("La boleta se elimina y el número vuelve a estar disponible.") },
             confirmButton = {
@@ -557,6 +603,54 @@ private fun DetalleContenido(
                 TextButton(onClick = { mostrarDialogoLiberar = false }) {
                     Text("Cancelar")
                 }
+            },
+        )
+    }
+
+    if (mostrarDialogoEditar && boleta != null) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoEditar = false },
+            title = { Text("Editar información") },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = nombreEditar,
+                        onValueChange = { nombreEditar = it },
+                        label = { Text("Nombre del cliente") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = telefonoEditar,
+                        onValueChange = { telefonoEditar = it },
+                        label = { Text("Celular con indicativo") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = montoEditar,
+                        onValueChange = { montoEditar = it },
+                        label = { Text("Monto pagado (pesos)") },
+                        prefix = { Text("$") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        mostrarDialogoEditar = false
+                        onEditar(nombreEditar, telefonoEditar, parsearPesosACentavos(montoEditar))
+                    },
+                    enabled = nombreEditar.isNotBlank() && telefonoEditar.isNotBlank(),
+                ) { Text("Guardar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogoEditar = false }) { Text("Cancelar") }
             },
         )
     }
@@ -588,6 +682,7 @@ private fun DialogoMonto(
 
     AlertDialog(
         onDismissRequest = onCancelar,
+        properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = true),
         title = { Text("Registrar abono") },
         text = {
             Column {

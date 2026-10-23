@@ -106,6 +106,7 @@ class AppContainer(application: Application) {
                 reservarNumero = reservarNumero,
                 registrarPago = registrarPago,
                 liberarNumero = liberarNumero,
+                boletas = boletas,
             )
         }
     }
