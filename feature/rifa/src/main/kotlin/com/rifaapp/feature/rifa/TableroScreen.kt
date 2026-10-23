@@ -42,6 +42,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.Surface
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -188,27 +189,60 @@ fun TableroScreen(
     val rifa = state.rifa
     val detalle = state.detalle
     if (rifa != null && detalle != null) {
-        ModalBottomSheet(onDismissRequest = onCerrarDetalle, sheetState = detalleSheetState) {
-            DetalleContenido(
-                rifa = rifa,
-                detalle = detalle,
-                onReservar = onReservar,
-                onAbonar = onAbonar,
-                onLiberar = onLiberar,
-            )
+        val scrollState = rememberScrollState()
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = onCerrarDetalle,
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize().imePadding(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 8.dp,
+                    modifier = Modifier
+                        .fillMaxWidth(0.92f)
+                        .padding(16.dp)
+                        .verticalScroll(scrollState),
+                ) {
+                    DetalleContenido(
+                        rifa = rifa,
+                        detalle = detalle,
+                        onReservar = onReservar,
+                        onAbonar = onAbonar,
+                        onLiberar = onLiberar,
+                    )
+                }
+            }
         }
     }
 
     if (mostrarFiltros) {
-        ModalBottomSheet(onDismissRequest = { mostrarFiltros = false }, sheetState = filtrosSheetState) {
-            FiltrosTablero(
-                busqueda = state.busqueda,
-                estadosFiltrados = state.estadosFiltrados,
-                onBusquedaChange = onBusquedaChange,
-                onToggleEstado = onToggleEstado,
-                onLimpiarFiltros = onLimpiarFiltros,
-            )
-            Spacer(modifier = Modifier.height(24.dp))
+        androidx.compose.ui.window.Dialog(onDismissRequest = { mostrarFiltros = false }, properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 8.dp,
+                    modifier = Modifier
+                        .fillMaxWidth(0.92f)
+                        .padding(16.dp),
+                ) {
+                    FiltrosTablero(
+                        busqueda = state.busqueda,
+                        estadosFiltrados = state.estadosFiltrados,
+                        onBusquedaChange = onBusquedaChange,
+                        onToggleEstado = onToggleEstado,
+                        onLimpiarFiltros = onLimpiarFiltros,
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+            }
         }
     }
 }
