@@ -603,7 +603,7 @@ private fun FiltrosTablero(
     onToggleEstado: (EstadoNumero) -> Unit,
     onLimpiarFiltros: () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
         OutlinedTextField(
             value = busqueda,
             onValueChange = onBusquedaChange,
