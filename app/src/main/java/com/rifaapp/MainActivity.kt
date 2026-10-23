@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                 ) { padding ->
-                    val contentModifier = Modifier
+                    val contentModifier = Modifier.padding(bottom = padding.calculateBottomPadding())
                     when (pantalla) {
                         Pantalla.TABLERO -> {
                             val viewModel: TableroViewModel = viewModel(factory = container.tableroViewModelFactory)
