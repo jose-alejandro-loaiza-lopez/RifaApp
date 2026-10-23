@@ -60,8 +60,11 @@ fun ConfigRifaScreen(
 
     LaunchedEffect(state.mensaje) {
         val texto = state.mensaje ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(texto)
-        onConsumirMensaje()
+        try {
+            snackbarHostState.showSnackbar(texto)
+        } finally {
+            onConsumirMensaje()
+        }
     }
 
     LaunchedEffect(state.guardado) {

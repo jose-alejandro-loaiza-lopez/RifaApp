@@ -96,8 +96,11 @@ fun TableroScreen(
 
     LaunchedEffect(state.mensaje) {
         val texto = state.mensaje ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(texto)
-        onConsumirMensaje()
+        try {
+            snackbarHostState.showSnackbar(texto)
+        } finally {
+            onConsumirMensaje()
+        }
     }
 
     var mostrarFiltros by remember { mutableStateOf(false) }
