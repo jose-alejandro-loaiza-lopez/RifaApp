@@ -108,15 +108,23 @@ fun ConfigRifaScreen(
         DatePickerDialog(
             onDismissRequest = { mostrarFecha = false },
             confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        formulario = formulario.copy(
-                            fechaSorteo = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate(),
-                        )
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextButton(onClick = {
+                        formulario = formulario.copy(fechaSorteo = null)
+                        mostrarFecha = false
+                    }) {
+                        Text("Quitar fecha")
                     }
-                    mostrarFecha = false
-                }) {
-                    Text("Aceptar")
+                    TextButton(onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            formulario = formulario.copy(
+                                fechaSorteo = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate(),
+                            )
+                        }
+                        mostrarFecha = false
+                    }) {
+                        Text("Aceptar")
+                    }
                 }
             },
             dismissButton = {
@@ -193,14 +201,6 @@ Scaffold(
                     formulario.fechaSorteo?.let { "Sorteo: ${it.format(FORMATO_FECHA)}" }
                         ?: "Elegir fecha del sorteo",
                 )
-            }
-            formulario.fechaSorteo?.let {
-                TextButton(
-                    onClick = { formulario = formulario.copy(fechaSorteo = null) },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("Quitar fecha")
-                }
             }
             Spacer(Modifier.height(16.dp))
 
